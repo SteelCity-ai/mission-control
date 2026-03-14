@@ -3,6 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Terminal, Lock, AlertCircle } from "lucide-react";
+import { BRANDING, getAgentDisplayName } from "@/config/branding";
 
 function LoginForm() {
   const [password, setPassword] = useState("");
@@ -54,7 +55,7 @@ function LoginForm() {
             className="w-7 h-7" 
             style={{ color: 'var(--accent)' }} 
           />
-          <span className="text-2xl">🦞</span>
+          <span className="text-2xl">{BRANDING.agentEmoji}</span>
           <h1 
             className="text-xl font-bold"
             style={{ 
@@ -63,14 +64,14 @@ function LoginForm() {
               letterSpacing: '-0.5px'
             }}
           >
-            Mission Control
+            {BRANDING.appTitle}
           </h1>
         </div>
         <p 
           className="text-sm"
           style={{ color: 'var(--text-secondary)' }}
         >
-          Introduce la contraseña para acceder
+          Enter password to access
         </p>
       </div>
 
