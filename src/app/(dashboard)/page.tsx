@@ -22,6 +22,7 @@ import {
   Terminal,
 } from "lucide-react";
 import Link from "next/link";
+import { BRANDING, getAgentDisplayName } from "@/config/branding";
 
 interface Stats {
   total: number;
@@ -74,10 +75,10 @@ export default function DashboardPage() {
             letterSpacing: '-1.5px'
           }}
         >
-          🦞 Mission Control
+          {BRANDING.agentEmoji} {BRANDING.appTitle}
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-          Overview of Tenacitas agent activity
+          Overview of {BRANDING.companyName} agent activity
         </p>
       </div>
 

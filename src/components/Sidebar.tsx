@@ -29,7 +29,7 @@ import {
   SquareTerminal,
   History,
 } from "lucide-react";
-import { getAgentDisplayName } from "@/config/branding";
+import { getAgentDisplayName, BRANDING } from "@/config/branding";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -208,7 +208,7 @@ export function Sidebar() {
               letterSpacing: "-0.5px",
             }}
           >
-            Mission Control
+            {BRANDING.appTitle}
           </h1>
         </div>
 

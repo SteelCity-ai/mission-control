@@ -92,7 +92,7 @@ function LoginForm() {
               border: '1px solid var(--border)',
               color: 'var(--text-primary)',
             }}
-            placeholder="Contraseña"
+            placeholder="Password"
             required
           />
         </div>
@@ -119,7 +119,7 @@ function LoginForm() {
             color: 'white',
           }}
         >
-          {loading ? "Verificando..." : "Entrar"}
+          {loading ? "Verifying..." : "Enter"}
         </button>
       </form>
 
@@ -128,7 +128,7 @@ function LoginForm() {
         className="text-center text-xs mt-6"
         style={{ color: 'var(--text-muted)' }}
       >
-        Tenacitas Agent Dashboard
+        {BRANDING.companyName} Agent Dashboard
       </p>
     </div>
   );
