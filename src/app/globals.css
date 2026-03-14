@@ -2,84 +2,412 @@
 @plugin "@tailwindcss/typography";
 
 /* ============================================
-   TenacitOS Design System
-   Based on tenacios-design.json (Pencil)
-   Updated: 2026-02-17
+   Steel City AI — Mission Control Theme
+   Pittsburgh-built, AI-powered
+   Version: 1.0.0  |  Author: Leia (Design)
    ============================================ */
 
 :root {
-  /* Core Colors */
-  --bg: #0C0C0C;
-  --background: #0C0C0C; /* alias for compatibility */
-  --foreground: #FFFFFF;
-  
-  /* Surface Colors */
-  --surface: #1A1A1A;
-  --surface-elevated: #242424;
-  --surface-hover: #2E2E2E;
-  --card: #1A1A1A; /* alias */
-  --card-elevated: #242424; /* alias */
-  
-  /* Borders */
-  --border: #2A2A2A;
-  --border-strong: #3A3A3A;
-  
-  /* Accent */
-  --accent: #FF3B30;
-  --accent-soft: rgba(255, 59, 48, 0.125);
-  --accent-hover: #FF524A;
-  --accent-muted: rgba(255, 59, 48, 0.1); /* legacy */
-  
-  /* Text Colors */
-  --text-primary: #FFFFFF;
-  --text-secondary: #8A8A8A;
-  --text-muted: #525252;
-  
-  /* Semantic Colors */
-  --positive: #32D74B;
-  --positive-soft: rgba(50, 215, 75, 0.125);
-  --negative: #FF453A;
-  --negative-soft: rgba(255, 69, 58, 0.125);
-  --warning: #FFD60A;
-  --warning-soft: rgba(255, 214, 10, 0.125);
-  --info: #0A84FF;
-  --info-soft: rgba(10, 132, 255, 0.125);
-  
-  /* Legacy aliases */
-  --success: #32D74B;
-  --success-bg: rgba(50, 215, 75, 0.1);
-  --error: #FF453A;
-  --error-bg: rgba(255, 69, 58, 0.1);
-  
-  /* Activity Type Colors */
-  --type-file: #64D2FF;
-  --type-file-bg: rgba(100, 210, 255, 0.125);
-  --type-search: #FFD60A;
-  --type-search-bg: rgba(255, 214, 10, 0.125);
-  --type-message: #32D74B;
-  --type-message-bg: rgba(50, 215, 75, 0.125);
-  --type-command: #BF5AF2;
-  --type-command-bg: rgba(191, 90, 242, 0.125);
-  --type-cron: #FF375F;
-  --type-cron-bg: rgba(255, 55, 95, 0.125);
-  --type-security: #FF453A;
-  --type-security-bg: rgba(255, 69, 58, 0.125);
-  --type-build: #FF9F0A;
-  --type-build-bg: rgba(255, 159, 10, 0.125);
-  
-  /* Typography - uses Next.js font variables */
-  --font-heading: var(--font-sora), system-ui, sans-serif;
+  /* ── Core Background ── */
+  --bg: #0A0C0F;
+  --background: #0A0C0F;
+  --foreground: #E8EDF2;
+
+  /* ── Surface Colors ── */
+  --surface: #111418;
+  --surface-elevated: #1A1E24;
+  --surface-hover: #1E2430;
+  --card: #111418;
+  --card-elevated: #1A1E24;
+
+  /* ── Borders ── */
+  --border: #1E2836;
+  --border-strong: #2A3A50;
+
+  /* ── Primary Accent — Electric Blue ── */
+  --accent: #0EA5E9;
+  --accent-soft: rgba(14, 165, 233, 0.12);
+  --accent-hover: #38BDF8;
+  --accent-muted: rgba(14, 165, 233, 0.08);
+
+  /* ── Secondary Accent — Pittsburgh Gold ── */
+  --gold: #FFB612;
+  --gold-soft: rgba(255, 182, 18, 0.12);
+  --gold-hover: #FFC233;
+
+  /* ── Text ── */
+  --text-primary: #E8EDF2;
+  --text-secondary: #7A8FA8;
+  --text-muted: #3D5066;
+
+  /* ── Semantic / Status ── */
+  --positive: #22C55E;
+  --positive-soft: rgba(34, 197, 94, 0.12);
+  --negative: #EF4444;
+  --negative-soft: rgba(239, 68, 68, 0.12);
+  --warning: #F59E0B;
+  --warning-soft: rgba(245, 158, 11, 0.12);
+  --info: #0EA5E9;
+  --info-soft: rgba(14, 165, 233, 0.12);
+  --neutral: #475569;
+  --neutral-soft: rgba(71, 85, 105, 0.15);
+
+  /* ── Legacy aliases (keep for tenacitOS compat) ── */
+  --success: #22C55E;
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --error: #EF4444;
+  --error-bg: rgba(239, 68, 68, 0.12);
+
+  /* ── Activity Type Colors ── */
+  --type-file: #06B6D4;
+  --type-file-bg: rgba(6, 182, 212, 0.12);
+  --type-search: #FFB612;
+  --type-search-bg: rgba(255, 182, 18, 0.12);
+  --type-message: #22C55E;
+  --type-message-bg: rgba(34, 197, 94, 0.12);
+  --type-command: #0EA5E9;
+  --type-command-bg: rgba(14, 165, 233, 0.12);
+  --type-cron: #F97316;
+  --type-cron-bg: rgba(249, 115, 22, 0.12);
+  --type-security: #EF4444;
+  --type-security-bg: rgba(239, 68, 68, 0.12);
+  --type-build: #F59E0B;
+  --type-build-bg: rgba(245, 158, 11, 0.12);
+
+  /* ── Typography ── */
+  --font-heading: var(--font-space-grotesk), system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), monospace;
-  
-  /* Spacing */
+
+  /* ── Radius ── */
+  --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-accent: 0 0 16px rgba(14, 165, 233, 0.2);
+  --shadow-gold: 0 0 16px rgba(255, 182, 18, 0.15);
+
+  /* ── Metallic Gradients ── */
+  --gradient-steel: linear-gradient(135deg, #111418 0%, #1A1E24 50%, #111418 100%);
+  --gradient-gold: linear-gradient(90deg, #FFB612 0%, #FFC233 100%);
+  --gradient-accent: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(14, 165, 233, 0.04) 100%);
+}
+
+/* ── Agent Pulse Animations ── */
+@keyframes pulse-online {
+  0%, 100% { box-shadow: 0 0 4px rgba(34, 197, 94, 0.6); }
+  50% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.9); }
+}
+
+@keyframes pulse-busy {
+  0%, 100% { box-shadow: 0 0 4px rgba(245, 158, 11, 0.6); }
+  50% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.9); }
+}
+
+/* ── Activity Feed Slide-in ── */
+@keyframes feed-enter {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feed-item-new {
+  animation: feed-enter 0.3s ease-out forwards;
+}
+
+/* ── Steel City Gold Button ── */
+.btn-gold {
+  background: var(--gradient-gold);
+  color: #0A0C0F;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 150ms ease;
+}
+
+.btn-gold:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-gold);
+}
+
+/* ── Status Dot ── */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.status-dot.online {
+  background-color: var(--positive);
+  animation: pulse-online 2s ease-in-out infinite;
+}
+
+.status-dot.busy {
+  background-color: var(--warning);
+  animation: pulse-busy 2s ease-in-out infinite;
+}
+
+.status-dot.offline {
+  background-color: var(--neutral);
+}
+
+/* ── Priority Pills ── */
+.priority-p0 {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.priority-p1 {
+  background: rgba(245, 158, 11, 0.12);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.priority-p2 {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0EA5E9;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.priority-p3 {
+  background: rgba(71, 85, 105, 0.15);
+  color: #475569;
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── Department Tabs ── */
+.dept-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dept-tab {
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.dept-tab:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.dept-tab.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: rgba(14, 165, 233, 0.3);
+  font-weight: 600;
+}
+
+/* ── Progress Bar ── */
+.progress-track {
+  height: 4px;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
+  transition: width 0.5s ease;
+}
+
+/* ── Kanban Board ── */
+.kanban-board {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 16px;
+  align-items: flex-start;
+}
+
+.kanban-column {
+  min-width: 280px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.kanban-column-header {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kanban-column.todo .kanban-column-header { border-top: 3px solid var(--neutral); }
+.kanban-column.in-progress .kanban-column-header { border-top: 3px solid var(--accent); }
+.kanban-column.blocked .kanban-column-header { border-top: 3px solid var(--negative); }
+.kanban-column.done .kanban-column-header { border-top: 3px solid var(--positive); }
+
+.kanban-cards {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 200px;
+}
+
+/* ── Routing Viz Node ── */
+.routing-node {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--surface-elevated);
+  border: 2px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 200ms ease;
+}
+
+.routing-node.active {
+  box-shadow: 0 0 16px rgba(14, 165, 233, 0.4);
+}
+
+.routing-node.done::after {
+  content: '✓';
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background: var(--positive);
+  border-radius: var(--radius-full);
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+}
+
+/* ── Live Feed Indicator ── */
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--positive);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--positive);
+  border-radius: var(--radius-full);
+  animation: pulse-online 1.5s ease-in-out infinite;
+}
+
+/* ── Metallic Card Variant ── */
+.card-metallic {
+  background: var(--gradient-steel);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Accent Card Variant ── */
+.card-accent {
+  border-left: 3px solid var(--accent);
+  background: var(--gradient-accent);
+}
+
+/* ── Gold Accent Card ── */
+.card-gold {
+  border-left: 3px solid var(--gold);
+  background: linear-gradient(135deg, rgba(255, 182, 18, 0.08) 0%, rgba(255, 182, 18, 0.02) 100%);
+}
+
+/* ── Agent Card ── */
+.agent-card {
+  background: var(--gradient-steel);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-md);
+  padding: 16px;
+  min-width: 160px;
+  transition: all 200ms ease;
+}
+
+.agent-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.agent-card.offline {
+  opacity: 0.7;
+}
+
+/* ── Dept Section Label (Sidebar) ── */
+.dept-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 16px 16px 4px;
 }
 
 /* Base Styles */
@@ -397,7 +725,7 @@ code, pre, .font-mono {
 
 /* Chart bar gradient (for analytics) */
 .chart-bar {
-  background: linear-gradient(180deg, var(--accent) 0%, rgba(255, 59, 48, 0.25) 100%);
+  background: linear-gradient(180deg, var(--accent) 0%, rgba(14, 165, 233, 0.25) 100%);
   border-radius: 4px 4px 0 0;
 }
 

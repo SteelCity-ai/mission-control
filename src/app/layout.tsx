@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Sora, JetBrains_Mono } from "next/font/google";
+import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { BRANDING } from "@/config/branding";
 
@@ -8,9 +8,9 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const sora = Sora({ 
+const spaceGrotesk = Space_Grotesk({ 
   subsets: ["latin"],
-  variable: "--font-sora",
+  variable: "--font-space-grotesk",
   weight: ["400", "500", "600", "700"],
 });
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: `${BRANDING.appTitle} - OpenClaw`,
   description: BRANDING.agentDescription || "Your OpenClaw agent dashboard",
   manifest: "/manifest.json",
-  themeColor: "#1a1a2e",
+  themeColor: "#0EA5E9",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -44,7 +44,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{__html:`if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js")`}} />
       </head>
       <body 
-        className={`${inter.variable} ${sora.variable} ${jetbrainsMono.variable} font-sans`}
+        className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans`}
         style={{ 
           backgroundColor: 'var(--background)', 
           color: 'var(--foreground)',
