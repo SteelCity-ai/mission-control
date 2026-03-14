@@ -1,6 +1,20 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { BRANDING } from "@/config/branding";
+import { 
+  Play, 
+  Plus, 
+  Settings, 
+  Users, 
+  Zap, 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  AlertCircle,
+  Loader2,
+  Search
+} from "lucide-react";
 
 interface Workflow {
   id: string;
@@ -11,6 +25,32 @@ interface Workflow {
   steps: string[];
   status: "active" | "inactive";
   trigger: "cron" | "demand";
+}
+
+// Steel City agents for orchestration
+const AVAILABLE_AGENTS = [
+  { id: 'main', name: 'Yoda', emoji: '🧙', department: 'Command', color: '#FF6B35' },
+  { id: 'foreman', name: 'R2', emoji: '🤖', department: 'Planning', color: '#8B5CF6' },
+  { id: 'research', name: '3CP0', emoji: '🔍', department: 'Research', color: '#3B82F6' },
+  { id: 'architect', name: 'Akbar', emoji: '📐', department: 'Architecture', color: '#F59E0B' },
+  { id: 'build', name: 'Luke', emoji: '🔨', department: 'Build', color: '#EF4444' },
+  { id: 'design', name: 'Leia', emoji: '🎨', department: 'Design', color: '#EC4899' },
+  { id: 'qa', name: 'Han', emoji: '🎯', department: 'QA', color: '#10B981' },
+  { id: 'growth', name: 'Lando', emoji: '📈', department: 'Growth', color: '#3B82F6' },
+  { id: 'reporter', name: 'Chewy', emoji: '📊', department: 'Reporting', color: '#14B8A6' },
+  { id: 'pm-sync', name: 'OBWON', emoji: '📋', department: 'PM Sync', color: '#6366F1' },
+];
+
+// Active workflow from API
+interface ActiveWorkflow {
+  id: string;
+  task: string;
+  agents: string[];
+  priority: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  createdAt: string;
+  result?: string;
+  error?: string;
 }
 
 const WORKFLOWS: Workflow[] = [
