@@ -1,0 +1,38 @@
+services:
+  mission-control:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mission-control
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - OPENCLAW_DIR=/openclaw
+      # Auth secrets - use Docker secrets or env files in production
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - AUTH_SECRET=${AUTH_SECRET}
+    volumes:
+      # Mount OpenClaw directory for read access
+      - ${OPENCLAW_DIR:-/data/.openclaw}:/openclaw:ro
+      # Persist data files ( SQLite, JSON, etc. )
+      - mission-control-data:/app/data
+    restart: unless-stopped
+    # Connect to OpenClaw's network if it exists
+    networks:
+      - openclaw-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mission-control-data:
+    driver: local
+
+networks:
+  openclaw-network:
+    external: true
+    name: openclaw-cnvy

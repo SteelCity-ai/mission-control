@@ -1,0 +1,62 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.*
+
+# Build outputs
+.next
+out
+build
+dist
+
+# Testing
+coverage
+
+# Misc
+.DS_Store
+*.pem
+*.log
+*.bak
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.development
+.env.production
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Design files
+design/
+
+# Backup files
+*.backup
+*.old
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database files (runtime data)
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+
+# Docker files (keep Dockerfile and docker-compose.yml)
+# docker-compose.override.yml
+# .docker/
