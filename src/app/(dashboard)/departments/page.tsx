@@ -44,14 +44,14 @@ interface TasksResponse {
 }
 
 const DEPARTMENTS = [
-  { id: "all", name: "All Departments" },
-  { id: "research", name: "Research" },
-  { id: "architecture", name: "Architecture" },
-  { id: "build", name: "Build" },
-  { id: "design", name: "Design" },
-  { id: "qa", name: "QA" },
-  { id: "growth", name: "Growth" },
-  { id: "reporting", name: "Reporting" },
+  { id: "all",          name: "All Departments", emoji: "🏢", color: "var(--accent)" },
+  { id: "research",     name: "Research",        emoji: "🔬", color: "#8B5CF6" },
+  { id: "architecture", name: "Architecture",    emoji: "🏗️", color: "#F59E0B" },
+  { id: "build",        name: "Build",           emoji: "⚡", color: "#22C55E" },
+  { id: "design",       name: "Design",          emoji: "🎨", color: "#EC4899" },
+  { id: "qa",           name: "QA",              emoji: "🛡️", color: "#EF4444" },
+  { id: "growth",       name: "Growth",          emoji: "📣", color: "#F97316" },
+  { id: "reporting",    name: "Reporting",       emoji: "📊", color: "#D97706" },
 ];
 
 const STATUS_COLUMNS = [
@@ -198,32 +198,30 @@ export default function DepartmentsPage() {
 
       {/* Department Filter Tabs */}
       <div className="mb-6 overflow-x-auto">
-        <div className="flex gap-2 pb-2" style={{ borderBottom: "1px solid var(--border)" }}>
-          {DEPARTMENTS.map((dept) => (
-            <button
-              key={dept.id}
-              onClick={() => setSelectedDepartment(dept.id)}
-              className="px-4 py-2 font-medium text-sm whitespace-nowrap transition-all"
-              style={{
-                color:
-                  selectedDepartment === dept.id
-                    ? "var(--accent)"
-                    : "var(--text-secondary)",
-                borderBottom:
-                  selectedDepartment === dept.id
-                    ? "2px solid var(--accent)"
-                    : "2px solid transparent",
-                background: "none",
-                borderTop: "none",
-                borderLeft: "none",
-                borderRight: "none",
-                cursor: "pointer",
-                marginBottom: "-1px",
-              }}
-            >
-              {dept.name}
-            </button>
-          ))}
+        <div className="flex gap-1 pb-2" style={{ borderBottom: "1px solid var(--border)" }}>
+          {DEPARTMENTS.map((dept) => {
+            const isActive = selectedDepartment === dept.id;
+            const activeColor = dept.color;
+            return (
+              <button
+                key={dept.id}
+                onClick={() => setSelectedDepartment(dept.id)}
+                className="flex items-center gap-1.5 px-3 py-2 font-medium text-sm whitespace-nowrap transition-all rounded-t-lg"
+                style={{
+                  color: isActive ? activeColor : "var(--text-secondary)",
+                  borderBottom: isActive ? `2px solid ${activeColor}` : "2px solid transparent",
+                  backgroundColor: isActive ? `${activeColor}10` : "transparent",
+                  border: "none",
+                  borderBottom: isActive ? `2px solid ${activeColor}` : "2px solid transparent",
+                  cursor: "pointer",
+                  marginBottom: "-1px",
+                }}
+              >
+                <span>{dept.emoji}</span>
+                {dept.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -234,7 +232,11 @@ export default function DepartmentsPage() {
           const ColumnIcon = column.icon;
 
           return (
-            <div key={column.id} className={`kanban-column ${column.id}`}>
+            <div
+              key={column.id}
+              className={`kanban-column ${column.id}`}
+              style={{ borderTop: `3px solid ${column.color}` }}
+            >
               <div className="kanban-column-header">
                 <div className="flex items-center gap-2">
                   <ColumnIcon className="w-4 h-4" style={{ color: column.color }} />
@@ -254,11 +256,21 @@ export default function DepartmentsPage() {
                 {columnTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="p-3 rounded-lg transition-all hover:scale-[1.02]"
+                    className="p-3 rounded-lg transition-all duration-150 group/card"
                     style={{
                       backgroundColor: "var(--card-elevated)",
                       border: "1px solid var(--border)",
                       cursor: "grab",
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = column.color;
+                      (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 12px rgba(0,0,0,0.4)`;
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+                      (e.currentTarget as HTMLElement).style.transform = "";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "";
                     }}
                   >
                     {/* Priority pill */}

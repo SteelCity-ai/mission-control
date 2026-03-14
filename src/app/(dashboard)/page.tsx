@@ -204,15 +204,25 @@ export default function DashboardPage() {
             {activeProjects.map((project) => (
               <div
                 key={project.id}
-                className="p-4 rounded-lg transition-all hover:scale-[1.02]"
+                className="p-4 rounded-lg transition-all duration-200"
                 style={{
                   backgroundColor: 'var(--card-elevated)',
                   border: '1px solid var(--border)',
                 }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                  (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-accent)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+                  (e.currentTarget as HTMLElement).style.transform = '';
+                  (e.currentTarget as HTMLElement).style.boxShadow = '';
+                }}
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-start justify-between mb-3 gap-2">
                   <h3 
-                    className="font-semibold"
+                    className="font-semibold leading-tight"
                     style={{ 
                       color: 'var(--text-primary)',
                       fontFamily: 'var(--font-heading)',
@@ -221,10 +231,11 @@ export default function DashboardPage() {
                     {project.name}
                   </h3>
                   <span 
-                    className="text-xs px-2 py-1 rounded-full"
+                    className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
                     style={{
-                      backgroundColor: project.status === 'active' ? 'var(--success-bg)' : 'var(--neutral-soft)',
-                      color: project.status === 'active' ? 'var(--success)' : 'var(--text-muted)',
+                      backgroundColor: project.status === 'active' ? 'var(--positive-soft)' : 'var(--neutral-soft)',
+                      color: project.status === 'active' ? 'var(--positive)' : 'var(--text-muted)',
+                      border: `1px solid ${project.status === 'active' ? 'rgba(34,197,94,0.3)' : 'transparent'}`,
                     }}
                   >
                     {project.status}
@@ -233,38 +244,54 @@ export default function DashboardPage() {
                 
                 {/* Progress bar */}
                 <div className="mb-3">
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Progress</span>
-                    <span className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>{project.progress}%</span>
+                    <span 
+                      className="text-xs font-bold tabular-nums"
+                      style={{ 
+                        color: project.progress >= 80 ? 'var(--positive)' : project.progress >= 50 ? 'var(--warning)' : 'var(--accent)',
+                      }}
+                    >
+                      {project.progress}%
+                    </span>
                   </div>
                   <div 
-                    className="h-2 rounded-full overflow-hidden"
+                    className="h-1.5 rounded-full overflow-hidden"
                     style={{ backgroundColor: 'var(--border)' }}
                   >
                     <div 
-                      className="h-full rounded-full transition-all"
+                      className="h-full rounded-full transition-all duration-700"
                       style={{ 
                         width: `${project.progress}%`,
-                        backgroundColor: project.progress >= 80 ? 'var(--success)' : project.progress >= 50 ? 'var(--warning)' : 'var(--accent)',
+                        background: project.progress >= 80 
+                          ? 'linear-gradient(90deg, #22C55E, #4ADE80)' 
+                          : project.progress >= 50 
+                            ? 'linear-gradient(90deg, #F59E0B, #FFC233)' 
+                            : 'linear-gradient(90deg, #0EA5E9, #38BDF8)',
                       }}
                     />
                   </div>
                 </div>
                 
                 {/* Task counts */}
-                <div className="flex items-center gap-3 text-xs">
-                  <span style={{ color: 'var(--success)' }}>
-                    <CheckCircle className="w-3 h-3 inline mr-1" />
-                    {project.tasksCount.completed}
+                <div className="flex items-center gap-4 text-xs">
+                  <span className="flex items-center gap-1" style={{ color: 'var(--positive)' }}>
+                    <CheckCircle className="w-3 h-3" />
+                    <span className="font-semibold">{project.tasksCount.completed}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>done</span>
                   </span>
-                  <span style={{ color: 'var(--warning)' }}>
-                    <Zap className="w-3 h-3 inline mr-1" />
-                    {project.tasksCount.inProgress}
+                  <span className="flex items-center gap-1" style={{ color: 'var(--warning)' }}>
+                    <Zap className="w-3 h-3" />
+                    <span className="font-semibold">{project.tasksCount.inProgress}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>active</span>
                   </span>
-                  <span style={{ color: 'var(--error)' }}>
-                    <AlertTriangle className="w-3 h-3 inline mr-1" />
-                    {project.tasksCount.blocked}
-                  </span>
+                  {project.tasksCount.blocked > 0 && (
+                    <span className="flex items-center gap-1" style={{ color: 'var(--negative)' }}>
+                      <AlertTriangle className="w-3 h-3" />
+                      <span className="font-semibold">{project.tasksCount.blocked}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>blocked</span>
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

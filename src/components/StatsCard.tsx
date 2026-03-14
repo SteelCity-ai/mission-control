@@ -22,10 +22,21 @@ export function StatsCard({
 }: StatsCardProps) {
   return (
     <div 
-      className="rounded-xl p-4 md:p-6"
+      className="rounded-xl p-4 md:p-6 group transition-all duration-200"
       style={{
         backgroundColor: 'var(--card)',
         border: '1px solid var(--border)',
+        cursor: 'default',
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLElement).style.borderColor = iconColor;
+        (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+        (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px ${iconColor}30`;
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+        (e.currentTarget as HTMLElement).style.transform = '';
+        (e.currentTarget as HTMLElement).style.boxShadow = '';
       }}
     >
       <div className="flex items-center justify-between mb-1.5 md:mb-2">
@@ -35,7 +46,14 @@ export function StatsCard({
         >
           {title}
         </span>
-        <div className="[&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5" style={{ color: iconColor }}>
+        {/* Icon with glow backing */}
+        <div 
+          className="w-8 h-8 rounded-lg flex items-center justify-center [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5"
+          style={{ 
+            color: iconColor,
+            backgroundColor: `${iconColor}18`,
+          }}
+        >
           {icon}
         </div>
       </div>
