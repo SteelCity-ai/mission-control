@@ -1,8 +1,8 @@
-# TenacitOS — Mission Control
+# Steel City AI — Mission Control
 
 A real-time dashboard and control center for [OpenClaw](https://openclaw.ai) AI agent instances. Built with Next.js, React 19, and Tailwind CSS v4.
 
-> **TenacitOS** lives inside your OpenClaw workspace and reads its configuration, agents, sessions, memory, and logs directly from the host. No extra database or backend required — OpenClaw is the backend.
+> **Mission Control** lives inside your OpenClaw workspace and reads its configuration, agents, sessions, memory, and logs directly from the host. No extra database or backend required — OpenClaw is the backend.
 
 ---
 
@@ -20,6 +20,7 @@ A real-time dashboard and control center for [OpenClaw](https://openclaw.ai) AI 
 - **🏢 Office 3D** — Interactive 3D office with one desk per agent (React Three Fiber)
 - **📺 Terminal** — Read-only terminal for safe status commands
 - **🔐 Auth** — Password-protected with rate limiting and secure cookie
+- **🏭 Steel City Branding** — Custom theme for the Pittsburgh AI team
 
 ---
 
@@ -27,102 +28,34 @@ A real-time dashboard and control center for [OpenClaw](https://openclaw.ai) AI 
 
 **Dashboard** — activity overview, agent status, and weather widget
 
-![Dashboard](./docs/screenshots/dashboard.jpg)
+![Dashboard](./docs/screenshots/09-dashboard-themed.png)
 
-**Session History** — all OpenClaw sessions with token usage and context tracking
+**Agents** — all Steel City AI agents with their status
 
-![Sessions](./docs/screenshots/sessions.jpg)
+![Agents](./docs/screenshots/10-agents-themed.png)
 
 **Costs & Analytics** — daily cost trends and breakdown per agent
 
-![Costs](./docs/screenshots/costs.jpg)
+![Costs](./docs/screenshots/11-costs-themed.png)
 
-**System Monitor** — real-time CPU, RAM, Disk, and Network metrics
+**Departments** — task boards organized by team
 
-![System Monitor](./docs/screenshots/system.jpg)
-
-**Office 3D** — interactive 3D office with one voxel avatar per agent (React Three Fiber)
-
-![Office 3D](./docs/screenshots/office3d.jpg)
+![Departments](./docs/screenshots/13-departments-kanban.png)
 
 ---
 
-## Requirements
-
-- **Node.js** 18+ (tested with v22)
-- **[OpenClaw](https://openclaw.ai)** installed and running on the same host
-- **PM2** or **systemd** (recommended for production)
-- **Caddy** or another reverse proxy (for HTTPS in production)
-
----
-
-## How it works
-
-TenacitOS reads directly from your OpenClaw installation:
-
-```
-/root/.openclaw/              ← OPENCLAW_DIR (configurable)
-├── openclaw.json             ← agents list, channels, models config
-├── workspace/                ← main agent workspace (MEMORY.md, SOUL.md, etc.)
-├── workspace-studio/         ← sub-agent workspaces
-├── workspace-infra/
-├── ...
-└── workspace/mission-control/ ← TenacitOS lives here
-```
-
-The app uses `OPENCLAW_DIR` to locate `openclaw.json` and all workspaces. **No manual agent configuration needed** — agents are auto-discovered from `openclaw.json`.
-
----
-
-## Installation
+## Quick Start
 
 ### 1. Clone into your OpenClaw workspace
 
 ```bash
-cd /root/.openclaw/workspace   # or your OPENCLAW_DIR/workspace
-git clone https://github.com/carlosazaustre/tenacitOS.git mission-control
+cd /data/.openclaw/workspace/projects/mission-control-dashboard
+git clone https://github.com/SteelCity-ai/mission-control.git
 cd mission-control
 npm install
 ```
 
-### 2. Configure environment
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local`:
-
-```env
-# --- Auth (required) ---
-# Strong password to log in to the dashboard
-ADMIN_PASSWORD=your-secure-password-here
-
-# Random secret used to sign the auth cookie
-# Generate with: openssl rand -base64 32
-AUTH_SECRET=your-random-32-char-secret-here
-
-# --- OpenClaw paths (optional — defaults work for standard installs) ---
-# OPENCLAW_DIR=/root/.openclaw
-
-# --- Branding (customize for your instance) ---
-NEXT_PUBLIC_AGENT_NAME=Mission Control
-NEXT_PUBLIC_AGENT_EMOJI=🤖
-NEXT_PUBLIC_AGENT_DESCRIPTION=Your AI co-pilot, powered by OpenClaw
-NEXT_PUBLIC_AGENT_LOCATION=             # e.g. "Madrid, Spain"
-NEXT_PUBLIC_BIRTH_DATE=                 # ISO date, e.g. "2026-01-01"
-NEXT_PUBLIC_AGENT_AVATAR=               # path to image in /public, e.g. "/avatar.jpg"
-
-NEXT_PUBLIC_OWNER_USERNAME=your-username
-NEXT_PUBLIC_OWNER_EMAIL=your-email@example.com
-NEXT_PUBLIC_TWITTER_HANDLE=@username
-NEXT_PUBLIC_COMPANY_NAME=MISSION CONTROL, INC.
-NEXT_PUBLIC_APP_TITLE=Mission Control
-```
-
-> **Tip:** `OPENCLAW_DIR` defaults to `/root/.openclaw`. If your OpenClaw is installed elsewhere, set this variable.
-
-### 3. Initialize data files
+### 2. Initialize data files
 
 ```bash
 cp data/cron-jobs.example.json data/cron-jobs.json
@@ -132,29 +65,84 @@ cp data/configured-skills.example.json data/configured-skills.json
 cp data/tasks.example.json data/tasks.json
 ```
 
-### 4. Generate secrets
+### 3. Start the development server
 
 ```bash
-# Auth secret
-openssl rand -base64 32
-
-# Password (or use a password manager)
-openssl rand -base64 18
+PORT=3456 npm run dev
+# → http://localhost:3456
 ```
 
-### 5. Run
+### 4. Login
 
-```bash
-# Development
-npm run dev
-# → http://localhost:3000
+Navigate to `http://localhost:3456` and login with:
 
-# Production build
-npm run build
-npm start
+- **Password:** `steel-city-2026`
+
+> **Note:** Change the `ADMIN_PASSWORD` in `.env.local` for production use.
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [USER-GUIDE.md](./docs/USER-GUIDE.md) | Complete user guide for Mission Control |
+| [PROJECT-REPORT.md](./docs/PROJECT-REPORT.md) | Project completion report and timeline |
+| [BRANCHING.md](./docs/BRANCHING.md) | Git branching strategy and conventions |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | How to contribute to this project |
+
+---
+
+## Tech Stack
+
+| Layer | Tech |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19 + Tailwind CSS v4 |
+| 3D | React Three Fiber + Drei |
+| Charts | Recharts |
+| Icons | Lucide React |
+| Database | SQLite (better-sqlite3) |
+| Runtime | Node.js 22 |
+
+---
+
+## Configuration
+
+### Environment Variables
+
+Edit `.env.local` to configure:
+
+```env
+# Auth (required)
+ADMIN_PASSWORD=your-secure-password
+AUTH_SECRET=your-random-32-char-secret
+
+# OpenClaw paths
+OPENCLAW_DIR=/data/.openclaw
+OPENCLAW_WORKSPACE=/data/.openclaw/workspace
+
+# Branding
+NEXT_PUBLIC_AGENT_NAME=Steel City AI
+NEXT_PUBLIC_AGENT_EMOJI=🏭
+NEXT_PUBLIC_COMPANY_NAME=STEEL CITY AI
+NEXT_PUBLIC_APP_TITLE=Steel City AI — Mission Control
 ```
 
-Login at `http://localhost:3000` with the `ADMIN_PASSWORD` you set.
+### Agent Branding
+
+Agents can define their own visual appearance in `openclaw.json`:
+
+```json
+{
+  "id": "main",
+  "name": "Yoda",
+  "ui": {
+    "emoji": "🧙",
+    "color": "#FFB612"
+  }
+}
+```
 
 ---
 
@@ -167,230 +155,20 @@ npm run build
 
 pm2 start npm --name "mission-control" -- start
 pm2 save
-pm2 startup   # enable auto-restart on reboot
+pm2 startup
 ```
-
-### systemd
-
-Create `/etc/systemd/system/mission-control.service`:
-
-```ini
-[Unit]
-Description=TenacitOS — OpenClaw Mission Control
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/root/.openclaw/workspace/mission-control
-ExecStart=/usr/bin/npm start
-Restart=always
-RestartSec=10
-Environment=NODE_ENV=production
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable mission-control
-sudo systemctl start mission-control
-```
-
-### Reverse proxy — Caddy (HTTPS)
-
-```caddy
-mission-control.yourdomain.com {
-    reverse_proxy localhost:3000
-}
-```
-
-> When behind HTTPS, `secure: true` is set automatically on the auth cookie.
-
----
-
-## Configuration
-
-### Agent branding
-
-All personal data stays in `.env.local` (gitignored). The `src/config/branding.ts` file reads from env vars — **never edit it directly** with your personal data.
-
-### Agent discovery
-
-Agents are auto-discovered from `openclaw.json` at startup. The `/api/agents` endpoint reads:
-
-```json
-{
-  "agents": {
-    "list": [
-      { "id": "main", "name": "...", "workspace": "...", "model": {...} },
-      { "id": "studio", "name": "...", "workspace": "..." }
-    ]
-  }
-}
-```
-
-Each agent can define its own visual appearance in `openclaw.json`:
-
-```json
-{
-  "id": "studio",
-  "name": "My Studio Agent",
-  "ui": {
-    "emoji": "🎬",
-    "color": "#E91E63"
-  }
-}
-```
-
-### Office 3D — agent positions
-
-The 3D office has default positions for up to 6 agents. To customize positions, names, and colors for your own agents, edit `src/components/Office3D/agentsConfig.ts`:
-
-```ts
-export const AGENTS: AgentConfig[] = [
-  {
-    id: "main",       // must match workspace ID
-    name: "...",      // display name (can also come from API)
-    emoji: "🤖",
-    position: [0, 0, 0],
-    color: "#FFCC00",
-    role: "Main Agent",
-  },
-  // add your sub-agents here
-];
-```
-
-### 3D Avatar models
-
-To add custom 3D avatars (Ready Player Me GLB format), place them in `public/models/`:
-
-```
-public/models/
-├── main.glb        ← main agent avatar
-├── studio.glb      ← workspace-studio agent
-└── infra.glb       ← workspace-infra agent
-```
-
-Filename must match the agent `id`. If no file is found, a colored sphere is shown as fallback.  
-See `public/models/README.md` for full instructions.
-
-### Cost tracking
-
-Usage is collected from OpenClaw's SQLite databases via a script:
-
-```bash
-# Collect once
-npx tsx scripts/collect-usage.ts
-
-# Auto-collect every hour (adds a cron job)
-./scripts/setup-cron.sh
-```
-
-See [docs/COST-TRACKING.md](./docs/COST-TRACKING.md) for details.
-
----
-
-## Project Structure
-
-```
-mission-control/
-├── src/
-│   ├── app/
-│   │   ├── (dashboard)/      # Dashboard pages (protected)
-│   │   ├── api/              # API routes
-│   │   ├── login/            # Login page
-│   │   └── office/           # 3D office (unprotected route)
-│   ├── components/
-│   │   ├── TenacitOS/        # OS-style UI shell (topbar, dock, status bar)
-│   │   └── Office3D/         # React Three Fiber 3D office
-│   ├── config/
-│   │   └── branding.ts       # Branding constants (reads from env vars)
-│   └── lib/                  # Utilities (pricing, queries, activity logger...)
-├── data/                     # JSON data files (gitignored — use .example versions)
-├── docs/                     # Extended documentation
-├── public/
-│   └── models/               # GLB avatar models (add your own)
-├── scripts/                  # Setup and data collection scripts
-├── .env.example              # Environment variable template
-└── middleware.ts             # Auth guard for all routes
-```
-
----
-
-## Security
-
-- All routes (including all `/api/*`) require authentication — handled by `src/middleware.ts`
-- `/api/auth/login` and `/api/health` are the only public endpoints
-- Login is rate-limited: **5 failed attempts → 15-minute lockout** per IP
-- Auth cookie is `httpOnly`, `sameSite: lax`, and `secure` in production
-- Terminal API uses a strict command allowlist — `env`, `curl`, `wget`, `node`, `python` are blocked
-- **Never commit `.env.local`** — it contains your credentials
-
-Generate fresh secrets:
-
-```bash
-openssl rand -base64 32   # AUTH_SECRET
-openssl rand -base64 18   # ADMIN_PASSWORD
-```
-
----
-
-## Troubleshooting
-
-**"Gateway not reachable" / agent data missing**
-
-```bash
-openclaw status
-openclaw gateway start   # if not running
-```
-
-**"Database not found" (cost tracking)**
-
-```bash
-npx tsx scripts/collect-usage.ts
-```
-
-**Build errors after pulling updates**
-
-```bash
-rm -rf .next node_modules
-npm install
-npm run build
-```
-
-**Scripts not executable**
-
-```bash
-chmod +x scripts/*.sh
-```
-
----
-
-## Tech Stack
-
-| Layer | Tech |
-|---|---|
-| Framework | Next.js 15 (App Router) |
-| UI | React 19 + Tailwind CSS v4 |
-| 3D | React Three Fiber + Drei |
-| Charts | Recharts |
-| Icons | Lucide React |
-| Database | SQLite (better-sqlite3) |
-| Runtime | Node.js 22 |
 
 ---
 
 ## Contributing
 
+Contributions are welcome! Please read our [contributing guidelines](./CONTRIBUTING.md) and read the [branching strategy](./docs/BRANCHING.md) before submitting PRs.
+
 1. Fork the repo
 2. Create a feature branch (`git checkout -b feat/my-feature`)
-3. **Keep personal data out of commits** — use `.env.local` and `data/` (both gitignored)
+3. Keep personal data out of commits (use `.env.local` and `data/`)
 4. Write clear commit messages
 5. Open a PR
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
 
 ---
 
@@ -402,7 +180,11 @@ MIT — see [LICENSE](./LICENSE)
 
 ## Links
 
+- [GitHub Repository](https://github.com/SteelCity-ai/mission-control)
+- [Linear Project](https://linear.app/steelcity-ai/project/mission-control-dashboard)
 - [OpenClaw](https://openclaw.ai) — the AI agent runtime this dashboard is built for
 - [OpenClaw Docs](https://docs.openclaw.ai)
-- [Discord Community](https://discord.com/invite/clawd)
-- [GitHub Issues](../../issues) — bug reports and feature requests
+
+---
+
+*Built by the Steel City AI Team — Pittsburgh's finest autonomous workforce* 🏭

@@ -145,6 +145,7 @@ export default function ActivityPage() {
   const [liveActivities, setLiveActivities] = useState<LiveActivity[]>([]);
   const [isLiveConnected, setIsLiveConnected] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Filters
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
@@ -203,8 +204,12 @@ export default function ActivityPage() {
         eventSource.onerror = () => {
           setIsLiveConnected(false);
           eventSource.close();
+          // Clear any pending reconnect timeout
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+          }
           // Reconnect after 5 seconds
-          setTimeout(connectSSE, 5000);
+          reconnectTimeoutRef.current = setTimeout(connectSSE, 5000);
         };
       } catch (e) {
         console.error("SSE connection error:", e);
@@ -214,6 +219,11 @@ export default function ActivityPage() {
     connectSSE();
 
     return () => {
+      // Clear pending reconnect timeout
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      // Close the SSE connection
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
@@ -284,7 +294,7 @@ export default function ActivityPage() {
   useEffect(() => {
     setOffset(0);
     fetchActivities(false);
-  }, [sort, selectedTypes, filterStatus, startDate, endDate]);
+  }, [sort, selectedTypes, filterStatus, startDate, endDate, fetchActivities]);
 
   useEffect(() => {
     const end = format(endOfDay(new Date()), "yyyy-MM-dd");
