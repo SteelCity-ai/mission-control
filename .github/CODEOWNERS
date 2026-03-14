@@ -1,0 +1,5 @@
+# Han (QA) reviews all code before merge
+* @SteelCity-ai/han-qa
+
+# Design spec changes also need Leia's input
+docs/DESIGN_SPEC.md @SteelCity-ai/leia-design @SteelCity-ai/han-qa

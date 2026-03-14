@@ -1,17 +1,13 @@
 /**
- * Office 3D — Agent Configuration
+ * Office 3D — Steel City Agent Configuration
  *
  * This file defines the visual layout of agents in the 3D office.
- * Names, emojis and roles are loaded at runtime from the OpenClaw API
- * (/api/agents → openclaw.json), so you only need to set positions and colors here.
+ * Updated for Steel City AI team (11 agents).
  *
  * Agent IDs correspond to workspace directory suffixes:
- *   id: "main"     → workspace/          (main agent)
- *   id: "studio"   → workspace-studio/
- *   id: "infra"    → workspace-infra/
+ *   id: "main"     → workspace/          (main agent - Yoda)
+ *   id: "foreman"  → workspace-foreman/  (R2)
  *   etc.
- *
- * Add, remove or reposition agents to match your own OpenClaw setup.
  */
 
 export interface AgentConfig {
@@ -21,56 +17,118 @@ export interface AgentConfig {
   position: [number, number, number]; // x, y, z
   color: string;
   role: string;
+  department: string;
 }
 
+// Steel City Agent Roster - 11 agents across 7 departments
 export const AGENTS: AgentConfig[] = [
+  // Operations Department (center)
   {
     id: "main",
-    name: process.env.NEXT_PUBLIC_AGENT_NAME || "Mission Control",
-    emoji: process.env.NEXT_PUBLIC_AGENT_EMOJI || "🦞",
+    name: "Yoda",
+    emoji: "🧙",
     position: [0, 0, 0], // Center — main desk
-    color: "#FFCC00",
-    role: "Main Agent",
+    color: "#FFB612", // Pittsburgh gold
+    role: "Router",
+    department: "Operations",
   },
   {
-    id: "agent-2",
-    name: "Agent 2",
+    id: "foreman",
+    name: "R2",
     emoji: "🤖",
-    position: [-4, 0, -3],
-    color: "#4CAF50",
-    role: "Sub-agent",
+    position: [-2, 0, -4],
+    color: "#C0C0C0", // Silver
+    role: "Foreman",
+    department: "Operations",
+  },
+  // Research Department
+  {
+    id: "research",
+    name: "3CP0",
+    emoji: "🔬",
+    position: [-6, 0, -4],
+    color: "#4A90D9", // Steel blue
+    role: "Research",
+    department: "Research",
+  },
+  // Architecture Department
+  {
+    id: "architect",
+    name: "Akbar",
+    emoji: "🏗️",
+    position: [6, 0, -4],
+    color: "#7B68EE", // Medium slate blue
+    role: "Architecture",
+    department: "Architecture",
+  },
+  // Build Department
+  {
+    id: "build",
+    name: "Luke",
+    emoji: "⚡",
+    position: [-6, 0, 0],
+    color: "#50C878", // Emerald green
+    role: "Build",
+    department: "Build",
   },
   {
-    id: "agent-3",
-    name: "Agent 3",
-    emoji: "🤖",
-    position: [4, 0, -3],
-    color: "#E91E63",
-    role: "Sub-agent",
+    id: "macgyver",
+    name: "MacGyver",
+    emoji: "🔧",
+    position: [2, 0, -4],
+    color: "#DAA520", // Goldenrod
+    role: "DevTools",
+    department: "Build",
   },
+  // Design Department
   {
-    id: "agent-4",
-    name: "Agent 4",
-    emoji: "🤖",
-    position: [-4, 0, 3],
-    color: "#0077B5",
-    role: "Sub-agent",
+    id: "design",
+    name: "Leia",
+    emoji: "🎨",
+    position: [6, 0, 0],
+    color: "#FF69B4", // Hot pink
+    role: "Design",
+    department: "Design",
   },
+  // QA Department
   {
-    id: "agent-5",
-    name: "Agent 5",
-    emoji: "🤖",
-    position: [4, 0, 3],
-    color: "#9C27B0",
-    role: "Sub-agent",
+    id: "qa",
+    name: "Han",
+    emoji: "🛡️",
+    position: [-6, 0, 4],
+    color: "#FF6347", // Tomato red
+    role: "QA",
+    department: "QA",
   },
+  // Growth Department
   {
-    id: "agent-6",
-    name: "Agent 6",
-    emoji: "🤖",
-    position: [0, 0, 6],
-    color: "#607D8B",
-    role: "Sub-agent",
+    id: "growth",
+    name: "Lando",
+    emoji: "📣",
+    position: [6, 0, 4],
+    color: "#FFA500", // Orange
+    role: "Growth",
+    department: "Growth",
+  },
+  // Reporting Department
+  {
+    id: "reporter",
+    name: "Chewy",
+    emoji: "📊",
+    position: [-2, 0, 6],
+    color: "#8B4513", // Saddle brown
+    role: "Reporting",
+    department: "Reporting",
+  },
+  // PM Sync
+  {
+    id: "pm-sync",
+    name: "OBWON",
+    emoji: "🗂️",
+    position: [2, 0, 6],
+    color: "#20B2AA", // Light sea green
+    role: "PM Sync",
+    department: "Operations",
   },
 ];
 
