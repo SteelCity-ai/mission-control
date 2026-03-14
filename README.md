@@ -198,6 +198,60 @@ sudo systemctl enable mission-control
 sudo systemctl start mission-control
 ```
 
+### Docker (recommended for containerized environments)
+
+Build and run with Docker Compose:
+
+```bash
+# Set required environment variables
+export ADMIN_PASSWORD=your-secure-password
+export AUTH_SECRET=$(openssl rand -base64 32)
+export OPENCLAW_DIR=/data/.openclaw  # or your OpenClaw path
+
+# Build and start the container
+docker compose up -d --build
+
+# View logs
+docker compose logs -f
+
+# Stop the container
+docker compose down
+```
+
+The container exposes port 3001 (mapped to internal 3000). Access at `http://localhost:3001`.
+
+#### Docker with OpenClaw network
+
+If OpenClaw runs in Docker, connect to its network:
+
+```bash
+# First, ensure the OpenClaw network exists
+docker network create openclaw-cnvy 2>/dev/null || true
+
+# Run with external network
+docker compose up -d
+```
+
+#### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ADMIN_PASSWORD` | Yes | Dashboard login password |
+| `AUTH_SECRET` | Yes | Cookie signing secret (`openssl rand -base64 32`) |
+| `OPENCLAW_DIR` | No | OpenClaw directory path (default: `/openclaw` inside container) |
+
+#### Data Persistence
+
+Data files (SQLite databases, JSON files) are stored in a Docker volume `mission-control-data`. To backup:
+
+```bash
+# Copy data from volume
+docker run --rm -v mission-control-data:/data -v $(pwd):backup alpine tar czf backup/mission-control-data.tar.gz /data
+
+# Restore data
+docker run --rm -v mission-control-data:/data -v $(pwd):backup alpine tar xzf backup/mission-control-data.tar.gz -C /
+```
+
 ### Reverse proxy — Caddy (HTTPS)
 
 ```caddy
