@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  mission-control:
+    build: .
+    ports:
+      - "3001:3000"
+    environment:
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-steel-city-2026}
+      - AUTH_SECRET=${AUTH_SECRET:-change-me-in-production}
+      - OPENCLAW_DIR=/data/.openclaw
+      - LINEAR_API_KEY=${LINEAR_API_KEY:-}
+    volumes:
+      - /data/.openclaw:/data/.openclaw:ro
+      - mission-control-data:/app/data
+    restart: unless-stopped
+    networks:
+      - openclaw-net
+
+volumes:
+  mission-control-data:
+
+networks:
+  openclaw-net:
+    external: true
+    name: openclaw-cnvy_default

@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+.env*
+data/*.db*
+data/*.jsonl
+.docker
+Dockerfile
+docker-compose.yml
