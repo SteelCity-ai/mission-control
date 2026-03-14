@@ -29,6 +29,9 @@ export const BRANDING = {
 
   // App title (shown in browser tab)
   appTitle: process.env.NEXT_PUBLIC_APP_TITLE || "Mission Control",
+
+  // Theme name for custom styling
+  themeName: process.env.NEXT_PUBLIC_THEME_NAME || "default",
 } as const;
 
 // Helper to get full agent display name
