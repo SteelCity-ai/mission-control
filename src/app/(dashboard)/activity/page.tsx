@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { ActivityHeatmap } from "@/components/ActivityHeatmap";
 import {
@@ -24,8 +24,24 @@ import {
   RotateCcw,
   ArrowUpDown,
   Download,
+  Radio,
 } from "lucide-react";
 import { RichDescription } from "@/components/RichDescription";
+
+// Steel City agent info
+const STEEL_CITY_AGENTS: Record<string, { name: string; emoji: string; department: string; color: string }> = {
+  main: { name: 'Yoda', emoji: '🧙', department: 'Command', color: '#FF6B35' },
+  foreman: { name: 'R2', emoji: '🤖', department: 'Planning', color: '#8B5CF6' },
+  research: { name: '3CP0', emoji: '🔍', department: 'Research', color: '#8B5CF6' },
+  architect: { name: 'Akbar', emoji: '📐', department: 'Architecture', color: '#F59E0B' },
+  build: { name: 'Luke', emoji: '🔨', department: 'Build', color: '#EF4444' },
+  design: { name: 'Leia', emoji: '🎨', department: 'Design', color: '#EC4899' },
+  qa: { name: 'Han', emoji: '🎯', department: 'QA', color: '#10B981' },
+  growth: { name: 'Lando', emoji: '📈', department: 'Growth', color: '#3B82F6' },
+  reporter: { name: 'Chewy', emoji: '📊', department: 'Reporting', color: '#14B8A6' },
+  'pm-sync': { name: 'OBWON', emoji: '📋', department: 'PM Sync', color: '#6366F1' },
+  macgyver: { name: 'MacGyver', emoji: '🛠️', department: 'Utilities', color: '#F97316' },
+};
 
 interface Activity {
   id: string;
@@ -36,6 +52,10 @@ interface Activity {
   duration_ms: number | null;
   tokens_used: number | null;
   metadata?: Record<string, unknown>;
+  agentName?: string;
+  agentEmoji?: string;
+  department?: string;
+  taskRef?: string;
 }
 
 interface ActivitiesResponse {
@@ -44,6 +64,17 @@ interface ActivitiesResponse {
   limit: number;
   offset: number;
   hasMore: boolean;
+}
+
+// Live activity item for the real-time panel
+interface LiveActivity {
+  id: string;
+  agentName: string;
+  agentEmoji: string;
+  department: string;
+  action: string;
+  taskRef?: string;
+  timestamp: string;
 }
 
 const typeIcons: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
@@ -97,6 +128,11 @@ function formatTokens(tokens: number): string {
   return `${(tokens / 1000).toFixed(1)}k`;
 }
 
+function formatLiveTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
 export default function ActivityPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,6 +140,11 @@ export default function ActivityPage() {
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
+  
+  // Live activity state
+  const [liveActivities, setLiveActivities] = useState<LiveActivity[]>([]);
+  const [isLiveConnected, setIsLiveConnected] = useState(false);
+  const eventSourceRef = useRef<EventSource | null>(null);
   
   // Filters
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
@@ -114,6 +155,70 @@ export default function ActivityPage() {
   const [activePreset, setActivePreset] = useState<number | null>(1); // Default: Last 7 days
 
   const limit = 20;
+
+  // Setup SSE connection for live activities
+  useEffect(() => {
+    const connectSSE = () => {
+      try {
+        const eventSource = new EventSource("/api/activities/stream");
+        eventSourceRef.current = eventSource;
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === "connected") {
+              setIsLiveConnected(true);
+            } else if (data.type === "new" && data.activity) {
+              const activity = data.activity;
+              // Add to live activities
+              const liveItem: LiveActivity = {
+                id: activity.id,
+                agentName: activity.agentName || "Unknown",
+                agentEmoji: activity.agentEmoji || "🤖",
+                department: activity.department || "Unknown",
+                action: activity.description || activity.type,
+                taskRef: activity.taskRef,
+                timestamp: activity.timestamp,
+              };
+              setLiveActivities(prev => [liveItem, ...prev].slice(0, 20));
+            } else if (data.type === "batch" && data.activities) {
+              // Load initial batch
+              const initialActivities: LiveActivity[] = data.activities.map((activity: Activity) => ({
+                id: activity.id,
+                agentName: activity.agentName || "Unknown",
+                agentEmoji: activity.agentEmoji || "🤖",
+                department: activity.department || "Unknown",
+                action: activity.description || activity.type,
+                taskRef: activity.taskRef,
+                timestamp: activity.timestamp,
+              }));
+              setLiveActivities(initialActivities);
+            }
+          } catch (e) {
+            // Ignore parse errors
+          }
+        };
+
+        eventSource.onerror = () => {
+          setIsLiveConnected(false);
+          eventSource.close();
+          // Reconnect after 5 seconds
+          setTimeout(connectSSE, 5000);
+        };
+      } catch (e) {
+        console.error("SSE connection error:", e);
+      }
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
 
   const fetchActivities = useCallback(async (append = false) => {
     const currentOffset = append ? offset : 0;
@@ -243,6 +348,7 @@ export default function ActivityPage() {
             color: 'var(--text-primary)',
             fontFamily: 'var(--font-heading)'
           }}>
+            <Radio className="inline-block w-7 h-7 mr-2 mb-1" style={{ color: 'var(--accent)' }} />
             Activity Log
           </h1>
           <p style={{ color: 'var(--text-secondary)' }}>Complete history of agent actions</p>
@@ -261,6 +367,102 @@ export default function ActivityPage() {
           <Download className="w-4 h-4" />
           Export CSV
         </a>
+      </div>
+
+      {/* Live Agent Activity Panel */}
+      <div 
+        className="mb-4 md:mb-6 rounded-xl overflow-hidden"
+        style={{
+          backgroundColor: 'var(--card)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <div 
+          className="flex items-center justify-between px-5 py-4"
+          style={{ borderBottom: '1px solid var(--border)' }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="live-indicator">
+              <span className="live-dot" />
+              LIVE
+            </div>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+              Real-time Agent Activity
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span 
+              className="text-xs px-2 py-1 rounded-full"
+              style={{
+                backgroundColor: isLiveConnected ? 'var(--success-bg)' : 'var(--error-bg)',
+                color: isLiveConnected ? 'var(--success)' : 'var(--error)',
+              }}
+            >
+              {isLiveConnected ? 'Connected' : 'Disconnected'}
+            </span>
+          </div>
+        </div>
+        <div className="p-4 max-h-48 overflow-y-auto">
+          {liveActivities.length === 0 ? (
+            <div className="text-center py-4" style={{ color: 'var(--text-muted)' }}>
+              Waiting for activities...
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {liveActivities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-center gap-3 p-2 rounded-lg"
+                  style={{ backgroundColor: 'var(--card-elevated)' }}
+                >
+                  <span className="text-xl">{activity.agentEmoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span 
+                        className="font-medium text-sm"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        {activity.agentName}
+                      </span>
+                      <span 
+                        className="text-xs px-1.5 py-0.5 rounded"
+                        style={{ 
+                          backgroundColor: 'var(--accent-muted)',
+                          color: 'var(--accent)',
+                        }}
+                      >
+                        {activity.department}
+                      </span>
+                      {activity.taskRef && (
+                        <span 
+                          className="text-xs px-1.5 py-0.5 rounded"
+                          style={{ 
+                            backgroundColor: 'var(--gold-soft)',
+                            color: 'var(--gold)',
+                          }}
+                        >
+                          {activity.taskRef}
+                        </span>
+                      )}
+                    </div>
+                    <div 
+                      className="text-xs truncate"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      {activity.action}
+                    </div>
+                  </div>
+                  <span 
+                    className="text-xs"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    {formatLiveTime(activity.timestamp)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Activity Heatmap */}

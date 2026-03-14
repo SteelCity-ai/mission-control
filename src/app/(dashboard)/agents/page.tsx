@@ -12,8 +12,24 @@ import {
   ExternalLink,
   GitBranch,
   LayoutGrid,
+  Briefcase,
 } from "lucide-react";
 import { AgentOrganigrama } from "@/components/AgentOrganigrama";
+
+// Steel City department mapping
+const AGENT_DEPARTMENTS: Record<string, { dept: string; color: string }> = {
+  main: { dept: "Command", color: "#FF6B35" },
+  foreman: { dept: "Project Planning", color: "#8B5CF6" },
+  research: { dept: "Research", color: "#8B5CF6" },
+  architect: { dept: "Architecture", color: "#F59E0B" },
+  build: { dept: "Build", color: "#EF4444" },
+  design: { dept: "Design", color: "#EC4899" },
+  qa: { dept: "QA", color: "#10B981" },
+  growth: { dept: "Growth", color: "#3B82F6" },
+  reporter: { dept: "Reporting", color: "#14B8A6" },
+  "pm-sync": { dept: "PM Sync", color: "#6366F1" },
+  macgyver: { dept: "Utilities", color: "#F97316" },
+};
 
 interface Agent {
   id: string;
@@ -73,6 +89,10 @@ export default function AgentsPage() {
     return `${days}d ago`;
   };
 
+  const getAgentDepartment = (agentId: string) => {
+    return AGENT_DEPARTMENTS[agentId] || { dept: "Unknown", color: "#666" };
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -98,11 +118,34 @@ export default function AgentsPage() {
           }}
         >
           <Users className="inline-block w-8 h-8 mr-2 mb-1" />
-          Agents
+          Steel City Agents
         </h1>
         <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-          Multi-agent system overview • {agents.length} agents configured
+          {agents.length} agents configured • Multi-agent system overview
         </p>
+      </div>
+
+      {/* Department Legend */}
+      <div 
+        className="mb-6 p-4 rounded-xl"
+        style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}
+      >
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+            Departments:
+          </span>
+          {Object.entries(AGENT_DEPARTMENTS).slice(1).map(([id, { dept, color }]) => (
+            <div key={id} className="flex items-center gap-1.5">
+              <div 
+                className="w-2 h-2 rounded-full" 
+                style={{ backgroundColor: color }}
+              />
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {dept}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Tab switcher */}
@@ -145,224 +188,247 @@ export default function AgentsPage() {
       {/* Agents Grid */}
       {activeTab === "cards" && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {agents.map((agent) => (
-          <div
-            key={agent.id}
-            className="rounded-xl overflow-hidden transition-all hover:scale-[1.02]"
-            style={{
-              backgroundColor: "var(--card)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            {/* Header with status */}
+        {agents.map((agent) => {
+          const deptInfo = getAgentDepartment(agent.id);
+          
+          return (
             <div
-              className="px-5 py-4 flex items-center justify-between"
+              key={agent.id}
+              className="agent-card"
               style={{
-                borderBottom: "1px solid var(--border)",
-                background: `linear-gradient(135deg, ${agent.color}15, transparent)`,
+                backgroundColor: "var(--card)",
+                border: "1px solid var(--border)",
               }}
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                  style={{
-                    backgroundColor: `${agent.color}20`,
-                    border: `2px solid ${agent.color}`,
-                  }}
-                >
-                  {agent.emoji}
-                </div>
-                <div>
-                  <h3
-                    className="text-lg font-bold"
+              {/* Header with status */}
+              <div
+                className="px-5 py-4 flex items-center justify-between"
+                style={{
+                  borderBottom: "1px solid var(--border)",
+                  background: `linear-gradient(135deg, ${agent.color}15, transparent)`,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
                     style={{
-                      fontFamily: "var(--font-heading)",
-                      color: "var(--text-primary)",
+                      backgroundColor: `${agent.color}20`,
+                      border: `2px solid ${agent.color}`,
                     }}
                   >
-                    {agent.name}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Circle
-                      className="w-2 h-2"
+                    {agent.emoji}
+                  </div>
+                  <div>
+                    <h3
+                      className="text-lg font-bold"
                       style={{
-                        fill: agent.status === "online" ? "#4ade80" : "#6b7280",
-                        color: agent.status === "online" ? "#4ade80" : "#6b7280",
-                      }}
-                    />
-                    <span
-                      className="text-xs font-medium"
-                      style={{
-                        color:
-                          agent.status === "online"
-                            ? "#4ade80"
-                            : "var(--text-muted)",
+                        fontFamily: "var(--font-heading)",
+                        color: "var(--text-primary)",
                       }}
                     >
-                      {agent.status}
-                    </span>
+                      {agent.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Circle
+                        className="status-dot"
+                        style={{
+                          fill: agent.status === "online" ? "#4ade80" : "#6b7280",
+                          color: agent.status === "online" ? "#4ade80" : "#6b7280",
+                        }}
+                      />
+                      <span
+                        className="text-xs font-medium"
+                        style={{
+                          color:
+                            agent.status === "online"
+                              ? "#4ade80"
+                              : "var(--text-muted)",
+                        }}
+                      >
+                        {agent.status}
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                {agent.botToken && (
+                  <div title="Telegram Bot Connected">
+                    <MessageSquare
+                      className="w-5 h-5"
+                      style={{ color: "#0088cc" }}
+                    />
+                  </div>
+                )}
               </div>
 
-              {agent.botToken && (
-                <div title="Telegram Bot Connected">
-                  <MessageSquare
-                    className="w-5 h-5"
-                    style={{ color: "#0088cc" }}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Details */}
-            <div className="p-5 space-y-4">
-              {/* Model */}
-              <div className="flex items-start gap-3">
-                <Bot className="w-4 h-4 mt-0.5" style={{ color: agent.color }} />
-                <div className="flex-1 min-w-0">
-                  <div
-                    className="text-xs font-medium mb-1"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    Model
-                  </div>
-                  <div
-                    className="text-sm font-mono truncate"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    {agent.model}
-                  </div>
-                </div>
-              </div>
-
-              {/* Workspace */}
-              <div className="flex items-start gap-3">
-                <HardDrive
-                  className="w-4 h-4 mt-0.5"
-                  style={{ color: agent.color }}
-                />
-                <div className="flex-1 min-w-0">
-                  <div
-                    className="text-xs font-medium mb-1"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    Workspace
-                  </div>
-                  <div
-                    className="text-sm font-mono truncate"
-                    style={{ color: "var(--text-primary)" }}
-                    title={agent.workspace}
-                  >
-                    {agent.workspace}
-                  </div>
-                </div>
-              </div>
-
-              {/* DM Policy */}
-              {agent.dmPolicy && (
+              {/* Details */}
+              <div className="p-5 space-y-4">
+                {/* Department */}
                 <div className="flex items-start gap-3">
-                  <Shield
-                    className="w-4 h-4 mt-0.5"
-                    style={{ color: agent.color }}
-                  />
+                  <Briefcase className="w-4 h-4 mt-0.5" style={{ color: deptInfo.color }} />
                   <div className="flex-1">
                     <div
                       className="text-xs font-medium mb-1"
                       style={{ color: "var(--text-muted)" }}
                     >
-                      DM Policy
+                      Department
                     </div>
                     <div
                       className="text-sm font-medium"
-                      style={{ color: "var(--text-primary)" }}
+                      style={{ color: deptInfo.color }}
                     >
-                      {agent.dmPolicy}
+                      {deptInfo.dept}
                     </div>
                   </div>
                 </div>
-              )}
 
-              {/* Subagents */}
-              {agent.allowAgents.length > 0 && (
+                {/* Model */}
                 <div className="flex items-start gap-3">
-                  <Users
+                  <Bot className="w-4 h-4 mt-0.5" style={{ color: agent.color }} />
+                  <div className="flex-1 min-w-0">
+                    <div
+                      className="text-xs font-medium mb-1"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      Model
+                    </div>
+                    <div
+                      className="text-sm font-mono truncate"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {agent.model}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Workspace */}
+                <div className="flex items-start gap-3">
+                  <HardDrive
                     className="w-4 h-4 mt-0.5"
                     style={{ color: agent.color }}
                   />
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div
-                      className="text-xs font-medium mb-2"
+                      className="text-xs font-medium mb-1"
                       style={{ color: "var(--text-muted)" }}
                     >
-                      Can spawn subagents ({agent.allowAgents.length})
+                      Workspace
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {agent.allowAgentsDetails && agent.allowAgentsDetails.length > 0 ? (
-                        agent.allowAgentsDetails.map((subagent) => (
-                          <div
-                            key={subagent.id}
-                            className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:scale-105"
-                            style={{
-                              backgroundColor: `${subagent.color}15`,
-                              border: `1px solid ${subagent.color}40`,
-                            }}
-                            title={`${subagent.name} (${subagent.id})`}
-                          >
-                            <span className="text-sm">{subagent.emoji}</span>
-                            <span
-                              style={{
-                                color: subagent.color,
-                                fontWeight: 600,
-                              }}
-                            >
-                              {subagent.name}
-                            </span>
-                          </div>
-                        ))
-                      ) : (
-                        agent.allowAgents.map((subagent) => (
-                          <span
-                            key={subagent}
-                            className="text-xs px-2 py-1 rounded"
-                            style={{
-                              backgroundColor: `${agent.color}20`,
-                              color: agent.color,
-                              fontWeight: 500,
-                            }}
-                          >
-                            {subagent}
-                          </span>
-                        ))
-                      )}
+                    <div
+                      className="text-sm font-mono truncate"
+                      style={{ color: "var(--text-primary)" }}
+                      title={agent.workspace}
+                    >
+                      {agent.workspace}
                     </div>
                   </div>
                 </div>
-              )}
 
-              {/* Last Activity */}
-              <div className="flex items-center justify-between pt-3 border-t border-[var(--border)]">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4" style={{ color: "var(--text-muted)" }} />
-                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                    Last activity: {formatLastActivity(agent.lastActivity)}
-                  </span>
-                </div>
-                {agent.activeSessions > 0 && (
-                  <span
-                    className="text-xs font-medium px-2 py-1 rounded"
-                    style={{
-                      backgroundColor: "var(--success)20",
-                      color: "var(--success)",
-                    }}
-                  >
-                    {agent.activeSessions} active
-                  </span>
+                {/* DM Policy */}
+                {agent.dmPolicy && (
+                  <div className="flex items-start gap-3">
+                    <Shield
+                      className="w-4 h-4 mt-0.5"
+                      style={{ color: agent.color }}
+                    />
+                    <div className="flex-1">
+                      <div
+                        className="text-xs font-medium mb-1"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        DM Policy
+                      </div>
+                      <div
+                        className="text-sm font-medium"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {agent.dmPolicy}
+                      </div>
+                    </div>
+                  </div>
                 )}
+
+                {/* Subagents */}
+                {agent.allowAgents.length > 0 && (
+                  <div className="flex items-start gap-3">
+                    <Users
+                      className="w-4 h-4 mt-0.5"
+                      style={{ color: agent.color }}
+                    />
+                    <div className="flex-1">
+                      <div
+                        className="text-xs font-medium mb-2"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        Can spawn subagents ({agent.allowAgents.length})
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {agent.allowAgentsDetails && agent.allowAgentsDetails.length > 0 ? (
+                          agent.allowAgentsDetails.map((subagent) => (
+                            <div
+                              key={subagent.id}
+                              className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:scale-105"
+                              style={{
+                                backgroundColor: `${subagent.color}15`,
+                                border: `1px solid ${subagent.color}40`,
+                              }}
+                              title={`${subagent.name} (${subagent.id})`}
+                            >
+                              <span className="text-sm">{subagent.emoji}</span>
+                              <span
+                                style={{
+                                  color: subagent.color,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {subagent.name}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          agent.allowAgents.map((subagent) => (
+                            <span
+                              key={subagent}
+                              className="text-xs px-2 py-1 rounded"
+                              style={{
+                                backgroundColor: `${agent.color}20`,
+                                color: agent.color,
+                                fontWeight: 500,
+                              }}
+                            >
+                              {subagent}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Last Activity */}
+                <div className="flex items-center justify-between pt-3 border-t border-[var(--border)]">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4" style={{ color: "var(--text-muted)" }} />
+                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      Last activity: {formatLastActivity(agent.lastActivity)}
+                    </span>
+                  </div>
+                  {agent.activeSessions > 0 && (
+                    <span
+                      className="text-xs font-medium px-2 py-1 rounded"
+                      style={{
+                        backgroundColor: "var(--success)20",
+                        color: "var(--success)",
+                      }}
+                    >
+                      {agent.activeSessions} active
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       )}
     </div>

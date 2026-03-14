@@ -2,9 +2,73 @@
  * Real-time activity stream via SSE
  * GET /api/activities/stream
  * Sends new activities as they arrive (polling SQLite every 2 seconds)
+ * Enhanced with Steel City agent names, department info, and task references
  */
 import { NextRequest } from 'next/server';
 import { getActivities } from '@/lib/activities-db';
+
+// Steel City agent mapping for enrichment
+const STEEL_CITY_AGENTS: Record<string, { name: string; emoji: string; department: string }> = {
+  main: { name: 'Yoda', emoji: '🧙', department: 'Command' },
+  foreman: { name: 'R2', emoji: '🤖', department: 'Project Planning' },
+  research: { name: '3CP0', emoji: '🔍', department: 'Research' },
+  architect: { name: 'Akbar', emoji: '📐', department: 'Architecture' },
+  build: { name: 'Luke', emoji: '🔨', department: 'Build' },
+  design: { name: 'Leia', emoji: '🎨', department: 'Design' },
+  qa: { name: 'Han', emoji: '🎯', department: 'QA' },
+  growth: { name: 'Lando', emoji: '📈', department: 'Growth' },
+  reporter: { name: 'Chewy', emoji: '📊', department: 'Reporting' },
+  'pm-sync': { name: 'OBWON', emoji: '📋', department: 'PM Sync' },
+  macgyver: { name: 'MacGyver', emoji: '🛠️', department: 'Utilities' },
+};
+
+// Try to extract agent ID from activity description or metadata
+function enrichActivityWithSteelCityInfo(activity: any): any {
+  let agentId = 'unknown';
+  let agentName = 'Unknown Agent';
+  let agentEmoji = '🤖';
+  let department = 'Unknown';
+  
+  // Try to find agent ID in metadata or description
+  if (activity.metadata?.agentId) {
+    agentId = activity.metadata.agentId;
+  } else if (activity.description) {
+    // Try to detect agent from description
+    const descLower = activity.description.toLowerCase();
+    for (const [id, info] of Object.entries(STEEL_CITY_AGENTS)) {
+      if (descLower.includes(id) || descLower.includes(info.name.toLowerCase())) {
+        agentId = id;
+        break;
+      }
+    }
+  }
+  
+  // Get Steel City info if found
+  if (STEEL_CITY_AGENTS[agentId]) {
+    const info = STEEL_CITY_AGENTS[agentId];
+    agentName = info.name;
+    agentEmoji = info.emoji;
+    department = info.department;
+  }
+  
+  // Try to extract task reference (e.g., STE-49, SC-001)
+  let taskRef = null;
+  if (activity.description) {
+    const taskMatch = activity.description.match(/(STE-\d+|SC-[A-Z]+-\d+)/i);
+    if (taskMatch) {
+      taskRef = taskMatch[1].toUpperCase();
+    }
+  }
+  
+  return {
+    ...activity,
+    agentId,
+    agentName,
+    agentEmoji,
+    department,
+    taskRef,
+  };
+}
 
 export async function GET(request: NextRequest) {
   const encoder = new TextEncoder();
@@ -19,8 +83,12 @@ export async function GET(request: NextRequest) {
         } catch {}
       };
 
-      // Send initial ping
-      send({ type: 'connected', ts: new Date().toISOString() });
+      // Send initial ping with Steel City context
+      send({ 
+        type: 'connected', 
+        ts: new Date().toISOString(),
+        agents: Object.values(STEEL_CITY_AGENTS).map(a => ({ name: a.name, emoji: a.emoji, department: a.department })),
+      });
 
       const poll = async () => {
         if (closed) return;
@@ -33,11 +101,12 @@ export async function GET(request: NextRequest) {
             const newest = activities[0];
 
             if (lastId === null) {
-              // First run: send a batch of recent activities
-              send({ type: 'batch', activities: activities.slice(0, 5) });
+              // First run: send a batch of recent activities with Steel City enrichment
+              const enrichedBatch = activities.slice(0, 5).map(enrichActivityWithSteelCityInfo);
+              send({ type: 'batch', activities: enrichedBatch });
               lastId = newest.id;
             } else if (newest.id !== lastId) {
-              // New activities since last check
+              // New activities since last check - with enrichment
               const newActivities = activities.filter((a) => {
                 // Send activities newer than lastId
                 const lastIdx = activities.findIndex((x) => x.id === lastId);
@@ -46,7 +115,8 @@ export async function GET(request: NextRequest) {
               });
 
               for (const activity of newActivities.reverse()) {
-                send({ type: 'new', activity });
+                const enriched = enrichActivityWithSteelCityInfo(activity);
+                send({ type: 'new', activity: enriched });
               }
               lastId = newest.id;
             }
