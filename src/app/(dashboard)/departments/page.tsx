@@ -209,9 +209,7 @@ export default function DepartmentsPage() {
                 className="flex items-center gap-1.5 px-3 py-2 font-medium text-sm whitespace-nowrap transition-all rounded-t-lg"
                 style={{
                   color: isActive ? activeColor : "var(--text-secondary)",
-                  borderBottom: isActive ? `2px solid ${activeColor}` : "2px solid transparent",
                   backgroundColor: isActive ? `${activeColor}10` : "transparent",
-                  border: "none",
                   borderBottom: isActive ? `2px solid ${activeColor}` : "2px solid transparent",
                   cursor: "pointer",
                   marginBottom: "-1px",
