@@ -1,0 +1,88 @@
+[
+  {
+    "id": "steel-mission-control",
+    "name": "Mission Control Dashboard",
+    "status": "active",
+    "progress": 65,
+    "milestones": [
+      { "id": "m1", "name": "Core API Routes", "completed": true },
+      { "id": "m2", "name": "Dashboard Pages", "completed": true },
+      { "id": "m3", "name": "Real-time Activity Stream", "completed": false },
+      { "id": "m4", "name": "Agent Management", "completed": false },
+      { "id": "m5", "name": "Department Kanban", "completed": false }
+    ],
+    "tasksCount": {
+      "total": 14,
+      "completed": 9,
+      "inProgress": 3,
+      "blocked": 2
+    },
+    "departments": {
+      "Research": 2,
+      "Architecture": 2,
+      "Build": 4,
+      "Design": 2,
+      "QA": 2,
+      "Growth": 1,
+      "Reporting": 1
+    },
+    "startDate": "2026-03-01",
+    "targetDate": "2026-04-15"
+  },
+  {
+    "id": "steel-voice-pipeline",
+    "name": "Voice Pipeline Integration",
+    "status": "planning",
+    "progress": 20,
+    "milestones": [
+      { "id": "m1", "name": "Research TTS/ASR Providers", "completed": true },
+      { "id": "m2", "name": "API Design", "completed": false },
+      { "id": "m3", "name": "Implementation", "completed": false }
+    ],
+    "tasksCount": {
+      "total": 8,
+      "completed": 2,
+      "inProgress": 1,
+      "blocked": 0
+    },
+    "departments": {
+      "Research": 2,
+      "Architecture": 2,
+      "Build": 3,
+      "Design": 1,
+      "QA": 0,
+      "Growth": 0,
+      "Reporting": 0
+    },
+    "startDate": "2026-03-10",
+    "targetDate": "2026-04-30"
+  },
+  {
+    "id": "steel-agent-memory",
+    "name": "Agent Memory System",
+    "status": "active",
+    "progress": 45,
+    "milestones": [
+      { "id": "m1", "name": "Memory Schema Design", "completed": true },
+      { "id": "m2", "name": "Long-term Storage", "completed": true },
+      { "id": "m3", "name": "Context Injection", "completed": false }
+    ],
+    "tasksCount": {
+      "total": 6,
+      "completed": 3,
+      "inProgress": 2,
+      "blocked": 1
+    },
+    "departments": {
+      "Research": 1,
+      "Architecture": 2,
+      "Build": 2,
+      "Design": 0,
+      "QA": 1,
+      "Growth": 0,
+      "Reporting": 0
+    },
+    "startDate": "2026-02-15",
+    "targetDate": "2026-03-30"
+  }
+]
