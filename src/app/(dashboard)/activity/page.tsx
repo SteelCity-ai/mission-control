@@ -295,10 +295,12 @@ export default function ActivityPage() {
     }
   }, [sort, selectedTypes, filterStatus, startDate, endDate, limit]);
 
+  // Fetch activities when filters change - using ref to avoid infinite loop
+  const fetchActivitiesRef = useRef(fetchActivities);
   useEffect(() => {
     setOffset(0);
-    fetchActivities(false);
-  }, [sort, selectedTypes, filterStatus, startDate, endDate, fetchActivities]);
+    fetchActivitiesRef.current(false);
+  }, [sort, selectedTypes, filterStatus, startDate, endDate]);
 
   useEffect(() => {
     const end = format(endOfDay(new Date()), "yyyy-MM-dd");
