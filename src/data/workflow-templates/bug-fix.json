@@ -1,0 +1,44 @@
+{
+  "id": "bug-fix",
+  "name": "Bug Fix Sprint",
+  "description": "Investigate, fix, test, and deploy a bug fix",
+  "icon": "🐛",
+  "category": "development",
+  "parameters": [
+    {
+      "key": "bug_description",
+      "label": "Bug Description",
+      "type": "text",
+      "required": true,
+      "placeholder": "Describe the bug you want to fix..."
+    },
+    {
+      "key": "severity",
+      "label": "Severity",
+      "type": "select",
+      "options": ["low", "medium", "high", "critical"],
+      "required": true
+    },
+    {
+      "key": "repo_url",
+      "label": "Repository URL",
+      "type": "text",
+      "required": false,
+      "placeholder": "https://github.com/org/repo"
+    }
+  ],
+  "steps": [
+    {
+      "agent": "research",
+      "task": "Investigate bug: {{bug_description}}. Severity: {{severity}}. Repository: {{repo_url}}"
+    },
+    {
+      "agent": "build",
+      "task": "Fix the bug based on research findings. Bug description: {{bug_description}}"
+    },
+    {
+      "agent": "qa",
+      "task": "Test the fix for bug: {{bug_description}} and verify no regressions. Severity was {{severity}}."
+    }
+  ]
+}

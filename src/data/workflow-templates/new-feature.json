@@ -1,0 +1,63 @@
+{
+  "id": "new-feature",
+  "name": "New Feature",
+  "description": "Research, architect, build, design, test, and launch a new feature",
+  "icon": "🚀",
+  "category": "development",
+  "parameters": [
+    {
+      "key": "feature_name",
+      "label": "Feature Name",
+      "type": "text",
+      "required": true,
+      "placeholder": "Name of the feature to build..."
+    },
+    {
+      "key": "feature_description",
+      "label": "Feature Description",
+      "type": "text",
+      "required": true,
+      "placeholder": "Describe what this feature should do..."
+    },
+    {
+      "key": "target_users",
+      "label": "Target Users",
+      "type": "text",
+      "required": false,
+      "placeholder": "Who will use this feature?"
+    },
+    {
+      "key": "repo_url",
+      "label": "Repository URL",
+      "type": "text",
+      "required": false,
+      "placeholder": "https://github.com/org/repo"
+    }
+  ],
+  "steps": [
+    {
+      "agent": "research",
+      "task": "Research the feature: {{feature_name}}. Description: {{feature_description}}. Target users: {{target_users}}"
+    },
+    {
+      "agent": "architect",
+      "task": "Architect the {{feature_name}} feature. Description: {{feature_description}}"
+    },
+    {
+      "agent": "build",
+      "task": "Build the {{feature_name}} feature based on the architecture. Description: {{feature_description}}"
+    },
+    {
+      "agent": "design",
+      "task": "Design the UI/UX for {{feature_name}}. Target users: {{target_users}}"
+    },
+    {
+      "agent": "qa",
+      "task": "Test the {{feature_name}} feature thoroughly. Verify it meets requirements: {{feature_description}}"
+    },
+    {
+      "agent": "growth",
+      "task": "Plan go-to-market strategy for {{feature_name}}. Target users: {{target_users}}"
+    }
+  ]
+}

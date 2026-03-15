@@ -1,0 +1,29 @@
+{
+  "id": "code-review",
+  "name": "Code Review",
+  "description": "Review code changes from a PR",
+  "icon": "👀",
+  "category": "development",
+  "parameters": [
+    {
+      "key": "pr_url",
+      "label": "PR URL",
+      "type": "text",
+      "required": true,
+      "placeholder": "https://github.com/org/repo/pull/123"
+    },
+    {
+      "key": "focus",
+      "label": "Focus Areas",
+      "type": "text",
+      "required": false,
+      "placeholder": "security, performance, code quality"
+    }
+  ],
+  "steps": [
+    {
+      "agent": "qa",
+      "task": "Review PR: {{pr_url}}. Focus on: {{focus}}"
+    }
+  ]
+}

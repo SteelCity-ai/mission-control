@@ -1,0 +1,36 @@
+{
+  "id": "research-only",
+  "name": "Research Only",
+  "description": "Deep research on a specific topic",
+  "icon": "🔍",
+  "category": "research",
+  "parameters": [
+    {
+      "key": "topic",
+      "label": "Research Topic",
+      "type": "text",
+      "required": true,
+      "placeholder": "What do you want to research?"
+    },
+    {
+      "key": "scope",
+      "label": "Research Scope",
+      "type": "select",
+      "options": ["brief", "comprehensive", "exhaustive"],
+      "required": true
+    },
+    {
+      "key": "context",
+      "label": "Additional Context",
+      "type": "text",
+      "required": false,
+      "placeholder": "Any specific context or requirements..."
+    }
+  ],
+  "steps": [
+    {
+      "agent": "research",
+      "task": "Conduct {{scope}} research on: {{topic}}. Context: {{context}}"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "id": "content-creation",
+  "name": "Content Creation",
+  "description": "Create marketing content for various platforms",
+  "icon": "📝",
+  "category": "marketing",
+  "parameters": [
+    {
+      "key": "topic",
+      "label": "Topic",
+      "type": "text",
+      "required": true,
+      "placeholder": "What topic do you want content about?"
+    },
+    {
+      "key": "platform",
+      "label": "Platform",
+      "type": "select",
+      "options": ["blog", "social", "email", "website"],
+      "required": true
+    },
+    {
+      "key": "audience",
+      "label": "Target Audience",
+      "type": "text",
+      "required": false,
+      "placeholder": "Who is this content for?"
+    }
+  ],
+  "steps": [
+    {
+      "agent": "growth",
+      "task": "Create {{platform}} content about: {{topic}}. Target audience: {{audience}}"
+    },
+    {
+      "agent": "design",
+      "task": "Create visual assets for {{platform}} content about: {{topic}}"
+    }
+  ]
+}
