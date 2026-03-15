@@ -7,8 +7,6 @@
  * - GET: Get sync status
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
 
 // In-memory sync state (reset on server restart)
 let syncState = {
@@ -57,6 +55,12 @@ async function linearQuery(query: string, variables: Record<string, unknown> = {
     body: JSON.stringify({ query, variables }),
   });
   
+  // Check response.ok before parsing (Bug 2 fix)
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Linear API error (${response.status}): ${response.statusText}. ${errorText}`);
+  }
+  
   const data = await response.json();
   
   if (data.errors) {
@@ -68,6 +72,14 @@ async function linearQuery(query: string, variables: Record<string, unknown> = {
 
 // GET: Return current sync status
 export async function GET() {
+  // Validate API key exists (Bug 1 fix - moved from module level)
+  if (!LINEAR_API_KEY) {
+    return NextResponse.json(
+      { error: 'Linear API key not configured. Set LINEAR_API_KEY environment variable.' },
+      { status: 500 }
+    );
+  }
+  
   return NextResponse.json({
     lastSync: syncState.lastSync,
     tasksSynced: syncState.tasksSynced,
@@ -78,6 +90,14 @@ export async function GET() {
 
 // POST: Trigger sync or update a task
 export async function POST(request: NextRequest) {
+  // Validate API key exists (Bug 1 fix - moved from module level)
+  if (!LINEAR_API_KEY) {
+    return NextResponse.json(
+      { error: 'Linear API key not configured. Set LINEAR_API_KEY environment variable.' },
+      { status: 500 }
+    );
+  }
+  
   try {
     const body = await request.json();
     const { action, taskId, status, identifier } = body;

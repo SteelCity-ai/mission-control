@@ -33,6 +33,11 @@ export function PmSyncWidget() {
   };
 
   const triggerSync = async () => {
+    // Guard: Don't sync if we don't have initial status yet (Bug 3 fix)
+    if (!status) {
+      return;
+    }
+    
     setSyncing(true);
     try {
       const res = await fetch("/api/pm-sync", {
@@ -42,17 +47,17 @@ export function PmSyncWidget() {
       });
       const data = await res.json();
       if (data.success) {
-        setStatus(prev => ({
-          ...prev!,
+        setStatus(prev => prev ? ({
+          ...prev,
           lastSync: data.lastSync,
           tasksSynced: data.tasks?.length || 0,
           lastError: null,
-        }));
+        }) : null);
       } else {
-        setStatus(prev => ({
-          ...prev!,
+        setStatus(prev => prev ? ({
+          ...prev,
           lastError: data.error,
-        }));
+        }) : null);
       }
     } catch (err) {
       console.error("Sync failed:", err);
@@ -145,7 +150,8 @@ export function PmSyncWidget() {
       {/* Sync button */}
       <button
         onClick={triggerSync}
-        disabled={syncing}
+        disabled={syncing || !status}
+        title={!status ? "Waiting for initial status..." : undefined}
         style={{
           width: "100%",
           padding: "0.5rem",
