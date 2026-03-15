@@ -1,0 +1,22 @@
+{
+  "openrouter/minimax/minimax-m2.5": {"input": 0.25, "output": 1.10},
+  "openrouter/google/gemini-3.1-pro-preview": {"input": 2.00, "output": 12.00},
+  "openrouter/google/gemini-3-flash-preview": {"input": 0.50, "output": 3.00},
+  "openrouter/hunter-alpha": {"input": 0, "output": 0},
+  "openrouter/healer-alpha": {"input": 0, "output": 0},
+  "openrouter/anthropic/claude-sonnet-4.6": {"input": 3.00, "output": 15.00},
+  "openrouter/anthropic/claude-opus-4.6": {"input": 15.00, "output": 75.00},
+  "openrouter/anthropic/claude-sonnet-4.5": {"input": 3.00, "output": 15.00},
+  "openrouter/anthropic/claude-haiku-3.5": {"input": 0.80, "output": 4.00},
+  "openrouter/google/gemini-2.5-flash": {"input": 0.15, "output": 0.60},
+  "openrouter/google/gemini-2.5-pro": {"input": 1.25, "output": 5.00},
+  "openrouter/x-ai/grok-4-1-fast": {"input": 2.00, "output": 10.00},
+  "anthropic/claude-opus-4.6": {"input": 15.00, "output": 75.00},
+  "anthropic/claude-sonnet-4.5": {"input": 3.00, "output": 15.00},
+  "anthropic/claude-haiku-3.5": {"input": 0.80, "output": 4.00},
+  "google/gemini-2.5-flash": {"input": 0.15, "output": 0.60},
+  "google/gemini-2.5-pro": {"input": 1.25, "output": 5.00},
+  "google/gemini-3.1-pro-preview": {"input": 2.00, "output": 12.00},
+  "minimax/minimax-m2.5": {"input": 0.30, "output": 1.10},
+  "default": {"input": 1.00, "output": 5.00}
+}
