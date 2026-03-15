@@ -10,7 +10,7 @@ interface Agent {
   model: string;
   allowAgents: string[];
   allowAgentsDetails?: Array<{ id: string; name: string; emoji: string; color: string }>;
-  status: "online" | "offline";
+  status: "online" | "offline" | "active" | "idle" | "error" | "unknown";
   activeSessions: number;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Bot,
   Circle,
@@ -13,8 +13,12 @@ import {
   GitBranch,
   LayoutGrid,
   Briefcase,
+  Wifi,
+  WifiOff,
+  RefreshCw,
 } from "lucide-react";
 import { AgentOrganigrama } from "@/components/AgentOrganigrama";
+import { useAgentStream } from "@/hooks/useAgentStream";
 
 // Steel City department mapping
 const AGENT_DEPARTMENTS: Record<string, { dept: string; color: string }> = {
@@ -47,33 +51,103 @@ interface Agent {
     color: string;
   }>;
   botToken?: string;
-  status: "online" | "offline";
+  status: "online" | "offline" | "active" | "idle" | "error" | "unknown";
   lastActivity?: string;
   activeSessions: number;
 }
 
+// Map SSE status to display status
+const mapSSEStatus = (sseStatus: "active" | "idle" | "error" | "unknown" | undefined): Agent["status"] => {
+  switch (sseStatus) {
+    case "active": return "online";
+    case "idle": return "offline";
+    case "error": return "error";
+    case "unknown": return "unknown";
+    default: return "offline";
+  }
+};
+
+// Get status color for live indicators
+const getStatusColor = (status: "active" | "idle" | "error" | "unknown" | undefined): string => {
+  switch (status) {
+    case "active": return "#4ade80"; // green
+    case "idle": return "#fbbf24"; // yellow/amber
+    case "error": return "#ef4444"; // red
+    case "unknown": return "#6b7280"; // gray
+    default: return "#6b7280";
+  }
+};
+
+// Get status text
+const getStatusText = (status: "active" | "idle" | "error" | "unknown" | undefined): string => {
+  switch (status) {
+    case "active": return "active";
+    case "idle": return "idle";
+    case "error": return "error";
+    case "unknown": return "unknown";
+    default: return "idle";
+  }
+};
+
 export default function AgentsPage() {
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"cards" | "organigrama">("cards");
+  
+  // Use SSE hook for real-time updates with polling fallback
+  const { agents: sseAgents, loading, error, source, reconnect } = useAgentStream({
+    maxRetries: 3,
+    fallbackUrl: "/api/agents",
+    pollingInterval: 10000,
+  });
+
+  // Merge SSE status with full agent data from /api/agents
+  const [fullAgents, setFullAgents] = useState<Agent[]>([]);
+  const [fullAgentsLoading, setFullAgentsLoading] = useState(true);
 
   useEffect(() => {
-    fetchAgents();
-    const interval = setInterval(fetchAgents, 10000);
-    return () => clearInterval(interval);
+    const fetchFullAgents = async () => {
+      try {
+        const res = await fetch("/api/agents");
+        const data = await res.json();
+        setFullAgents(data.agents || []);
+      } catch (err) {
+        console.error("Error fetching full agent data:", err);
+      } finally {
+        setFullAgentsLoading(false);
+      }
+    };
+    fetchFullAgents();
   }, []);
 
-  const fetchAgents = async () => {
-    try {
-      const res = await fetch("/api/agents");
-      const data = await res.json();
-      setAgents(data.agents || []);
-    } catch (error) {
-      console.error("Error fetching agents:", error);
-    } finally {
-      setLoading(false);
+  // Merge SSE status into full agent data
+  const agents: Agent[] = useMemo(() => {
+    if (fullAgentsLoading || fullAgents.length === 0) {
+      // If we have SSE data but no full data yet, create minimal agents
+      return sseAgents.map(sse => ({
+        id: sse.id,
+        name: sse.name,
+        emoji: "🤖",
+        color: "#666666",
+        model: sse.model || "",
+        workspace: "",
+        status: mapSSEStatus(sse.status),
+        lastActivity: sse.lastActivity,
+        allowAgents: [],
+        activeSessions: 0,
+      }));
     }
-  };
+
+    // Merge SSE status into full agent data
+    return fullAgents.map(agent => {
+      const sseStatus = sseAgents.find(s => s.id === agent.id);
+      return {
+        ...agent,
+        status: sseStatus ? mapSSEStatus(sseStatus.status) : agent.status,
+        lastActivity: sseStatus?.lastActivity || agent.lastActivity,
+      };
+    });
+  }, [fullAgents, fullAgentsLoading, sseAgents]);
+
+  const isLoading = loading || fullAgentsLoading;
 
   const formatLastActivity = (timestamp?: string) => {
     if (!timestamp) return "Never";
@@ -93,7 +167,7 @@ export default function AgentsPage() {
     return AGENT_DEPARTMENTS[agentId] || { dept: "Unknown", color: "#666" };
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-8">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -105,24 +179,74 @@ export default function AgentsPage() {
     );
   }
 
+  // Get SSE status for an agent
+  const getSSEStatus = (agentId: string): "active" | "idle" | "error" | "unknown" | undefined => {
+    const sse = sseAgents.find(s => s.id === agentId);
+    return sse?.status;
+  };
+
   return (
     <div className="p-4 md:p-8">
       {/* Header */}
       <div className="mb-6">
-        <h1
-          className="text-3xl font-bold mb-2"
-          style={{
-            fontFamily: "var(--font-heading)",
-            color: "var(--text-primary)",
-            letterSpacing: "-1.5px",
-          }}
-        >
-          <Users className="inline-block w-8 h-8 mr-2 mb-1" />
-          Steel City Agents
-        </h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-          {agents.length} agents configured • Multi-agent system overview
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1
+              className="text-3xl font-bold mb-2"
+              style={{
+                fontFamily: "var(--font-heading)",
+                color: "var(--text-primary)",
+                letterSpacing: "-1.5px",
+              }}
+            >
+              <Users className="inline-block w-8 h-8 mr-2 mb-1" />
+              Steel City Agents
+            </h1>
+            <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+              {agents.length} agents configured • Multi-agent system overview
+            </p>
+          </div>
+          
+          {/* Connection Status Indicator */}
+          <div className="flex items-center gap-3">
+            {error && (
+              <span 
+                className="text-xs px-2 py-1 rounded"
+                style={{ backgroundColor: "#ef444420", color: "#ef4444" }}
+                title={error}
+              >
+                {error}
+              </span>
+            )}
+            <div 
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium"
+              style={{ 
+                backgroundColor: source === "sse" ? "#4ade8020" : "#fbbf2420",
+                color: source === "sse" ? "#4ade80" : "#fbbf24",
+                border: `1px solid ${source === "sse" ? "#4ade8050" : "#fbbf2450"}`,
+              }}
+            >
+              {source === "sse" ? (
+                <>
+                  <Wifi className="w-3.5 h-3.5" />
+                  <span>Live</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="w-3.5 h-3.5" />
+                  <span>Polling</span>
+                </>
+              )}
+              <button 
+                onClick={reconnect}
+                className="ml-1 hover:rotate-180 transition-transform"
+                title="Reconnect"
+              >
+                <RefreshCw className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Department Legend */}
@@ -248,24 +372,32 @@ export default function AgentsPage() {
                       {agent.name}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
+                      {/* Live status indicator - uses SSE status for real-time updates */}
                       <Circle
-                        className="status-dot"
+                        className="status-dot animate-pulse"
                         style={{
-                          fill: agent.status === "online" ? "#4ade80" : "#6b7280",
-                          color: agent.status === "online" ? "#4ade80" : "#6b7280",
+                          fill: getStatusColor(getSSEStatus(agent.id)),
+                          color: getStatusColor(getSSEStatus(agent.id)),
                         }}
                       />
                       <span
                         className="text-xs font-medium"
                         style={{
-                          color:
-                            agent.status === "online"
-                              ? "#4ade80"
-                              : "var(--text-muted)",
+                          color: getStatusColor(getSSEStatus(agent.id)),
                         }}
                       >
-                        {agent.status}
+                        {getStatusText(getSSEStatus(agent.id))}
                       </span>
+                      {/* Show original status as tooltip */}
+                      {agent.status !== mapSSEStatus(getSSEStatus(agent.id)) && (
+                        <span 
+                          className="text-xs" 
+                          style={{ color: "var(--text-muted)" }}
+                          title={`Originally: ${agent.status}`}
+                        >
+                          ({agent.status})
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
