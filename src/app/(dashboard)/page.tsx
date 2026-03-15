@@ -192,7 +192,7 @@ export default function DashboardPage() {
             </h2>
           </div>
           <Link
-            href="/projects"
+            href="/departments"
             className="text-sm font-medium"
             style={{ color: 'var(--accent)' }}
           >
@@ -438,7 +438,7 @@ export default function DashboardPage() {
           <div className="p-4 grid grid-cols-2 gap-2">
             {[
               { href: "/departments", icon: Users, label: "Departments", color: "#8B5CF6" },
-              { href: "/tasks", icon: Zap, label: "Tasks", color: "var(--accent)" },
+              { href: "/actions", icon: Zap, label: "Quick Actions", color: "var(--accent)" },
               { href: "/agents", icon: Bot, label: "Agents", color: "#10B981" },
               { href: "/logs", icon: Terminal, label: "Live Logs", color: "#60a5fa" },
               { href: "/memory", icon: Brain, label: "Memory", color: "#f59e0b" },

@@ -34,7 +34,7 @@ function LoginForm() {
         setError("Contraseña incorrecta");
       }
     } catch {
-      setError("Error de conexión");
+      setError("Connection error");
     }
 
     setLoading(false);

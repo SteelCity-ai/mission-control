@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   Bot,
   Circle,
@@ -91,6 +92,7 @@ const getStatusText = (status: "active" | "idle" | "error" | "unknown" | undefin
 
 export default function AgentsPage() {
   const [activeTab, setActiveTab] = useState<"cards" | "organigrama">("cards");
+  const router = useRouter();
   
   // Use SSE hook for real-time updates with polling fallback
   const { agents: sseAgents, loading, error, source, reconnect } = useAgentStream({
@@ -326,12 +328,13 @@ export default function AgentsPage() {
           return (
             <div
               key={agent.id}
-              className="agent-card"
+              className="agent-card cursor-pointer"
               style={{
                 backgroundColor: "var(--card)",
                 border: `1px solid ${agent.color}30`,
                 transition: "all 200ms ease",
               }}
+              onClick={() => router.push(`/logs?agent=${agent.id}`)}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.borderColor = `${agent.color}80`;
                 (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px ${agent.color}20`;
