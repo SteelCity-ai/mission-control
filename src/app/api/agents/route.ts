@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join } from "path";
+import { execSync } from "child_process";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,31 @@ const DEFAULT_AGENT_CONFIG: Record<string, { emoji: string; color: string; name?
 };
 
 /**
+ * Get session counts per agent from openclaw sessions command
+ */
+function getAgentSessionCounts(): Record<string, number> {
+  try {
+    const output = execSync('openclaw sessions --all-agents --json 2>/dev/null', {
+      timeout: 10000,
+      encoding: 'utf-8',
+    });
+    const data = JSON.parse(output);
+    const sessions: Array<{ agentId: string }> = data.sessions || [];
+    
+    // Count sessions per agent
+    const counts: Record<string, number> = {};
+    for (const session of sessions) {
+      const agentId = session.agentId;
+      counts[agentId] = (counts[agentId] || 0) + 1;
+    }
+    return counts;
+  } catch (error) {
+    console.error('Error getting session counts:', error);
+    return {};
+  }
+}
+
+/**
  * Get agent display info (emoji, color, name) from openclaw.json or defaults
  */
 function getAgentDisplayInfo(agentId: string, agentConfig: any): { emoji: string; color: string; name: string } {
@@ -60,6 +86,9 @@ export async function GET() {
     // Read openclaw config
     const configPath = (process.env.OPENCLAW_DIR || "/root/.openclaw") + "/openclaw.json";
     const config = JSON.parse(readFileSync(configPath, "utf-8"));
+
+    // Get session counts per agent
+    const sessionCounts = getAgentSessionCounts();
 
     // Get agents from config
     const agents: Agent[] = config.agents.list.map((agent: any) => {
@@ -132,7 +161,7 @@ export async function GET() {
         botToken: botToken ? "configured" : undefined,
         status,
         lastActivity,
-        activeSessions: 0, // TODO: get from sessions API
+        activeSessions: sessionCounts[agent.id] || 0,
       };
     });
 

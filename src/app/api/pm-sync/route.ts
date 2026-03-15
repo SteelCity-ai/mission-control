@@ -7,6 +7,8 @@
  * - GET: Get sync status
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 // In-memory sync state (reset on server restart)
 let syncState = {
@@ -16,17 +18,14 @@ let syncState = {
   lastError: null as string | null,
 };
 
-// Linear API config - must be set via LINEAR_API_KEY env var
-const LINEAR_API_KEY = process.env.LINEAR_API_KEY;
-if (!LINEAR_API_KEY) {
-  throw new Error('LINEAR_API_KEY environment variable is required');
-}
+// Linear API config
+const LINEAR_API_KEY = process.env.LINEAR_API_KEY || '';
 const LINEAR_ENDPOINT = 'https://api.linear.app/graphql';
 
 // Linear state mappings for STE team
 const STATE_MAP: Record<string, string> = {
   'todo': '1178cb1f-2c5c-4a67-8818-b321a812d3e1',
-  'in_progress': 'b037ea96-2d1c-49a4-a65a-26fa6251d633',
+  'in_progress': 'b037ea96-2d1c-4a4-a65a-26fa6251d633',
   'in review': '7259b04a-a243-45a3-9ec2-ddecadaa5ec8',
   'done': 'ccb080e8-dcac-449c-b9d3-83d1b545f953',
   'canceled': 'b6bbb9f5-f58b-4034-8fab-5f39e6fb2474',
@@ -72,7 +71,7 @@ export async function GET() {
   return NextResponse.json({
     lastSync: syncState.lastSync,
     tasksSynced: syncState.tasksSynced,
-    errors: syncState.errors.slice(-10),
+    errors: syncState.errors.slice(-10), // Last 10 errors
     lastError: syncState.lastError,
   });
 }
@@ -86,6 +85,7 @@ export async function POST(request: NextRequest) {
     console.log(`[PM-SYNC] Action: ${action}`, { taskId, status, identifier });
     
     if (action === 'sync') {
+      // Full sync - fetch all issues from Linear
       const query = `
         query($teamId: String!) {
           issues(filter: { team: { id: { eq: $teamId } } }, first: 100) {
@@ -93,8 +93,14 @@ export async function POST(request: NextRequest) {
               id
               identifier
               title
-              state { name id }
-              assignee { name email }
+              state {
+                name
+                id
+              }
+              assignee {
+                name
+                email
+              }
             }
           }
         }
@@ -121,6 +127,7 @@ export async function POST(request: NextRequest) {
     }
     
     if (action === 'update' && taskId && status) {
+      // Update specific task status in Linear
       const stateId = STATE_MAP[status.toLowerCase()];
       
       if (!stateId) {
@@ -130,18 +137,39 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      const getIssueQuery = `query($identifier: String!) { issue(identifier: $identifier) { id identifier title } }`;
+      // First, get the Linear issue ID from the task identifier
+      const getIssueQuery = `
+        query($identifier: String!) {
+          issue(identifier: $identifier) {
+            id
+            identifier
+            title
+          }
+        }
+      `;
+      
       const issueData = await linearQuery(getIssueQuery, { identifier: taskId });
       
       if (!issueData.issue) {
-        return NextResponse.json({ error: `Issue not found: ${taskId}` }, { status: 404 });
+        return NextResponse.json(
+          { error: `Issue not found: ${taskId}` },
+          { status: 404 }
+        );
       }
       
+      // Update the issue state
       const updateMutation = `
         mutation($id: String!, $stateId: String!) {
           issueUpdate(id: $id, input: { stateId: $stateId }) {
             success
-            issue { id identifier state { name id } }
+            issue {
+              id
+              identifier
+              state {
+                name
+                id
+              }
+            }
           }
         }
       `;
@@ -165,6 +193,7 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // Test connection action
     if (action === 'test') {
       const query = `query { viewer { name } }`;
       const result = await linearQuery(query);
@@ -188,6 +217,9 @@ export async function POST(request: NextRequest) {
     syncState.lastError = errorMessage;
     syncState.errors.push(errorMessage);
     
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: errorMessage },
+      { status: 500 }
+    );
   }
 }

@@ -63,14 +63,17 @@ export function PmSyncWidget() {
 
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 30000);
+    const interval = setInterval(fetchStatus, 30000); // Refresh every 30s
     return () => clearInterval(interval);
   }, []);
 
   const formatTime = (iso: string | null) => {
     if (!iso) return "Never";
     const date = new Date(iso);
-    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+    return date.toLocaleTimeString("en-US", { 
+      hour: "2-digit", 
+      minute: "2-digit",
+    });
   };
 
   return (
@@ -80,8 +83,19 @@ export function PmSyncWidget() {
       borderRadius: "0.75rem",
       border: "1px solid var(--border)",
     }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-        <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+      {/* Header */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "space-between",
+        marginBottom: "0.75rem" 
+      }}>
+        <div style={{ 
+          fontSize: "0.75rem", 
+          color: "var(--text-muted)", 
+          textTransform: "uppercase", 
+          letterSpacing: "0.05em" 
+        }}>
           🔄 PM Sync
         </div>
         {status?.lastError ? (
@@ -93,7 +107,13 @@ export function PmSyncWidget() {
         )}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "0.75rem" }}>
+      {/* Stats */}
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "1fr 1fr", 
+        gap: "0.5rem",
+        marginBottom: "0.75rem" 
+      }}>
         <div>
           <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>Last Sync</div>
           <div style={{ fontSize: "0.875rem", fontWeight: 600 }}>
@@ -108,12 +128,21 @@ export function PmSyncWidget() {
         </div>
       </div>
 
+      {/* Error display */}
       {status?.lastError && (
-        <div style={{ fontSize: "0.7rem", color: "#ef4444", marginBottom: "0.5rem", padding: "0.375rem", backgroundColor: "rgba(239,68,68,0.1)", borderRadius: "0.375rem" }}>
+        <div style={{ 
+          fontSize: "0.7rem", 
+          color: "#ef4444", 
+          marginBottom: "0.5rem",
+          padding: "0.375rem",
+          backgroundColor: "rgba(239,68,68,0.1)",
+          borderRadius: "0.375rem",
+        }}>
           {status.lastError}
         </div>
       )}
 
+      {/* Sync button */}
       <button
         onClick={triggerSync}
         disabled={syncing}
@@ -132,6 +161,7 @@ export function PmSyncWidget() {
           justifyContent: "center",
           gap: "0.375rem",
           opacity: syncing ? 0.7 : 1,
+          transition: "all 0.2s",
         }}
       >
         <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />

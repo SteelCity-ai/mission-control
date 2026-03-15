@@ -145,6 +145,7 @@ export default function ActivityPage() {
   const [liveActivities, setLiveActivities] = useState<LiveActivity[]>([]);
   const [isLiveConnected, setIsLiveConnected] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Filters
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
@@ -203,8 +204,12 @@ export default function ActivityPage() {
         eventSource.onerror = () => {
           setIsLiveConnected(false);
           eventSource.close();
+          // Clear any pending reconnect timeout
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+          }
           // Reconnect after 5 seconds
-          setTimeout(connectSSE, 5000);
+          reconnectTimeoutRef.current = setTimeout(connectSSE, 5000);
         };
       } catch (e) {
         console.error("SSE connection error:", e);
@@ -214,14 +219,22 @@ export default function ActivityPage() {
     connectSSE();
 
     return () => {
+      // Clear pending reconnect timeout
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      // Close the SSE connection
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
     };
   }, []);
 
+  // Use ref for offset to avoid infinite loop in useCallback
+  const offsetRef = useRef(0);
+
   const fetchActivities = useCallback(async (append = false) => {
-    const currentOffset = append ? offset : 0;
+    const currentOffset = append ? offsetRef.current : 0;
     
     if (append) {
       setLoadingMore(true);
@@ -269,7 +282,8 @@ export default function ActivityPage() {
       
       setTotal(data.total);
       setHasMore(data.hasMore);
-      setOffset(currentOffset + data.activities.length);
+      offsetRef.current = currentOffset + data.activities.length;
+      setOffset(offsetRef.current);
     } catch (error) {
       console.error("Failed to fetch activities:", error);
       if (!append) {
@@ -279,11 +293,13 @@ export default function ActivityPage() {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [offset, sort, selectedTypes, filterStatus, startDate, endDate]);
+  }, [sort, selectedTypes, filterStatus, startDate, endDate, limit]);
 
+  // Fetch activities when filters change - using ref to avoid infinite loop
+  const fetchActivitiesRef = useRef(fetchActivities);
   useEffect(() => {
     setOffset(0);
-    fetchActivities(false);
+    fetchActivitiesRef.current(false);
   }, [sort, selectedTypes, filterStatus, startDate, endDate]);
 
   useEffect(() => {

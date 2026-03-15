@@ -2,6 +2,68 @@
 @plugin "@tailwindcss/typography";
 
 /* ============================================
+   STE-47: Steel City Brand Colors — Tailwind v4 Theme Override
+   Registers brand colors as Tailwind utilities:
+     bg-steel-900, text-electric-500, text-gold-400, etc.
+   ============================================ */
+@theme {
+  /* ── Steel (dark backgrounds) ── */
+  --color-steel-950: #0A0C0F;
+  --color-steel-900: #111418;
+  --color-steel-800: #1A1E24;
+  --color-steel-700: #1E2430;
+  --color-steel-600: #1E2836;
+  --color-steel-500: #2A3A50;
+  --color-steel-400: #3D5066;
+  --color-steel-300: #7A8FA8;
+  --color-steel-200: #A8B8C8;
+  --color-steel-100: #E8EDF2;
+
+  /* ── Electric Blue (primary accent) ── */
+  --color-electric-950: #042A44;
+  --color-electric-900: #0A4A6E;
+  --color-electric-800: #0870A8;
+  --color-electric-700: #0A8FCC;
+  --color-electric-600: #0CA0DE;
+  --color-electric-500: #0EA5E9;
+  --color-electric-400: #38BDF8;
+  --color-electric-300: #7DD3FC;
+  --color-electric-200: #BAE6FD;
+  --color-electric-100: #E0F2FE;
+
+  /* ── Pittsburgh Gold (secondary accent) ── */
+  --color-gold-950: #3D2600;
+  --color-gold-900: #6B4200;
+  --color-gold-800: #9A6100;
+  --color-gold-700: #C87F00;
+  --color-gold-600: #E8A000;
+  --color-gold-500: #FFB612;
+  --color-gold-400: #FFC233;
+  --color-gold-300: #FFD166;
+  --color-gold-200: #FFE099;
+  --color-gold-100: #FFF4CC;
+
+  /* ── Semantic status colors ── */
+  --color-steel-green-500: #22C55E;
+  --color-steel-red-500: #EF4444;
+  --color-steel-amber-500: #F59E0B;
+  --color-steel-cyan-500: #06B6D4;
+
+  /* ── Font families ── */
+  --font-heading: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), monospace;
+
+  /* ── Border radius ── */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+}
+
+/* ============================================
    Steel City AI — Mission Control Theme
    Pittsburgh-built, AI-powered
    Version: 1.0.0  |  Author: Leia (Design)

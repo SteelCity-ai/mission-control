@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Simple in-memory rate limiter (per-IP, resets on server restart)
-// Sufficient for a personal dashboard — no external dependency needed
 const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const LOCKOUT_MS = 15 * 60 * 1000; // 15 minute lockout after max attempts
+const WINDOW_MS = 15 * 60 * 1000;
+const LOCKOUT_MS = 15 * 60 * 1000;
 
 interface AttemptRecord {
   count: number;
@@ -31,56 +29,50 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfterMs?: number }
     return { allowed: true };
   }
 
-  // Still locked out?
   if (record.lockedUntil && now < record.lockedUntil) {
     return { allowed: false, retryAfterMs: record.lockedUntil - now };
   }
 
-  // Window expired — reset
   if (now - record.windowStart > WINDOW_MS) {
     attempts.delete(ip);
     return { allowed: true };
   }
 
-  // Within window, check count
   if (record.count >= MAX_ATTEMPTS) {
-    // Lock out
     record.lockedUntil = now + LOCKOUT_MS;
-    attempts.set(ip, record);
     return { allowed: false, retryAfterMs: LOCKOUT_MS };
   }
 
   return { allowed: true };
 }
 
-function recordFailure(ip: string): void {
+function recordAttempt(ip: string) {
   const now = Date.now();
   const record = attempts.get(ip);
 
   if (!record || now - record.windowStart > WINDOW_MS) {
     attempts.set(ip, { count: 1, windowStart: now });
   } else {
-    record.count += 1;
-    attempts.set(ip, record);
+    record.count++;
   }
 }
 
-function clearAttempts(ip: string): void {
+function clearAttempts(ip: string) {
   attempts.delete(ip);
 }
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
+  const rateCheck = checkRateLimit(ip);
 
-  // Rate limit check
-  const { allowed, retryAfterMs } = checkRateLimit(ip);
-  if (!allowed) {
-    const retryAfterSec = Math.ceil((retryAfterMs ?? LOCKOUT_MS) / 1000);
+  if (!rateCheck.allowed) {
     return NextResponse.json(
-      { success: false, error: "Too many failed attempts. Try again later." },
+      { success: false, error: "Too many attempts. Try again later." },
       {
         status: 429,
-        headers: { "Retry-After": String(retryAfterSec) },
+        headers: {
+          "Retry-After": Math.ceil((rateCheck.retryAfterMs || 0) / 1000).toString(),
+        },
       }
     );
   }
@@ -88,25 +80,23 @@ export async function POST(request: NextRequest) {
   const { password } = await request.json();
 
   if (password === process.env.ADMIN_PASSWORD) {
-    clearAttempts(ip); // Reset on success
+    clearAttempts(ip);
 
     const response = NextResponse.json({ success: true });
 
-    // Set auth cookie (7 days expiry)
-    // secure=true in production (HTTPS), false in dev (HTTP localhost)
-    response.cookies.set("mc_auth", process.env.AUTH_SECRET!, {
+    // Set secure=false for HTTP access (set SECURE_COOKIES=true for HTTPS)
+    response.cookies.set("mc_auth", process.env.AUTH_SECRET || "steelcity-secret", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.SECURE_COOKIES === "true",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
+      maxAge: 60 * 60 * 24 * 7,
     });
 
     return response;
   }
 
-  // Record failed attempt
-  recordFailure(ip);
+  recordAttempt(ip);
 
   return NextResponse.json(
     { success: false, error: "Invalid password" },

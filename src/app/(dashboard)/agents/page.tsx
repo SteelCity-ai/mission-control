@@ -130,48 +130,56 @@ export default function AgentsPage() {
         className="mb-6 p-4 rounded-xl"
         style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}
       >
-        <div className="flex flex-wrap items-center gap-4">
-          <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-            Departments:
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wider mr-2" style={{ color: "var(--text-muted)" }}>
+            Departments
           </span>
           {Object.entries(AGENT_DEPARTMENTS).slice(1).map(([id, { dept, color }]) => (
-            <div key={id} className="flex items-center gap-1.5">
-              <div 
-                className="w-2 h-2 rounded-full" 
+            <span
+              key={id}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+              style={{ 
+                backgroundColor: `${color}18`,
+                color,
+                border: `1px solid ${color}40`,
+              }}
+            >
+              <span 
+                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                 style={{ backgroundColor: color }}
               />
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                {dept}
-              </span>
-            </div>
+              {dept}
+            </span>
           ))}
         </div>
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-2 mb-6 border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="flex gap-1 mb-6" style={{ borderBottom: "1px solid var(--border)" }}>
         {[
           { id: "cards" as const, label: "Agent Cards", icon: LayoutGrid },
           { id: "organigrama" as const, label: "Organigrama", icon: GitBranch },
-        ].map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id)}
-            className="flex items-center gap-2 px-4 py-2 font-medium transition-all"
-            style={{
-              color: activeTab === id ? "var(--accent)" : "var(--text-secondary)",
-              borderBottom: activeTab === id ? "2px solid var(--accent)" : "2px solid transparent",
-              background: "none", border: "none", cursor: "pointer",
-              borderBottomStyle: "solid",
-              borderBottomWidth: "2px",
-              borderBottomColor: activeTab === id ? "var(--accent)" : "transparent",
-              paddingBottom: "0.5rem",
-            }}
-          >
-            <Icon className="w-4 h-4" />
-            {label}
-          </button>
-        ))}
+        ].map(({ id, label, icon: Icon }) => {
+          const isActive = activeTab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className="flex items-center gap-2 px-4 py-2 font-medium text-sm transition-all rounded-t-lg"
+              style={{
+                color: isActive ? "var(--accent)" : "var(--text-secondary)",
+                backgroundColor: isActive ? "var(--accent-soft)" : "transparent",
+                borderBottom: isActive ? "2px solid var(--accent)" : "2px solid transparent",
+                outline: "none",
+                cursor: "pointer",
+                marginBottom: "-1px",
+              }}
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Organigrama View */}
@@ -197,7 +205,18 @@ export default function AgentsPage() {
               className="agent-card"
               style={{
                 backgroundColor: "var(--card)",
-                border: "1px solid var(--border)",
+                border: `1px solid ${agent.color}30`,
+                transition: "all 200ms ease",
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = `${agent.color}80`;
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px ${agent.color}20`;
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = `${agent.color}30`;
+                (e.currentTarget as HTMLElement).style.boxShadow = "";
+                (e.currentTarget as HTMLElement).style.transform = "";
               }}
             >
               {/* Header with status */}
