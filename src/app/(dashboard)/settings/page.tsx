@@ -5,6 +5,7 @@ import { Settings, RefreshCw } from "lucide-react";
 import { SystemInfo } from "@/components/SystemInfo";
 import { IntegrationStatus } from "@/components/IntegrationStatus";
 import { QuickActions } from "@/components/QuickActions";
+import { LocationSettings } from "@/components/LocationSettings";
 
 interface SystemData {
   agent: {
@@ -36,8 +37,16 @@ interface SystemData {
   timestamp: string;
 }
 
+interface LocationConfig {
+  city: string;
+  timezone: string;
+  latitude: number;
+  longitude: number;
+}
+
 export default function SettingsPage() {
   const [systemData, setSystemData] = useState<SystemData | null>(null);
+  const [location, setLocation] = useState<LocationConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
@@ -54,8 +63,21 @@ export default function SettingsPage() {
     }
   };
 
+  const fetchLocation = async () => {
+    try {
+      const res = await fetch("/api/config");
+      const data = await res.json();
+      if (data.location) {
+        setLocation(data.location);
+      }
+    } catch (error) {
+      console.error("Failed to fetch location config:", error);
+    }
+  };
+
   useEffect(() => {
     fetchSystemData();
+    fetchLocation();
     const interval = setInterval(fetchSystemData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -111,13 +133,18 @@ export default function SettingsPage() {
           <SystemInfo data={systemData} />
         </div>
 
+        {/* Location Settings */}
+        <div>
+          <LocationSettings location={location} onLocationChange={setLocation} />
+        </div>
+
         {/* Integration Status */}
         <div>
           <IntegrationStatus integrations={systemData?.integrations || null} />
         </div>
 
         {/* Quick Actions */}
-        <div>
+        <div className="lg:col-span-2">
           <QuickActions onActionComplete={handleRefresh} />
         </div>
       </div>

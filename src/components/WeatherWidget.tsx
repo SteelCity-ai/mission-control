@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Wind, Droplets, Thermometer } from "lucide-react";
 
@@ -107,10 +107,10 @@ export function WeatherWidget() {
             📍 {weather.city}
           </div>
           <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)", lineHeight: 1, letterSpacing: "-1px" }}>
-            {format(now, "HH:mm")}
+            {formatInTimeZone(now, weather.timezone || 'local', "HH:mm")}
           </div>
           <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.125rem" }}>
-            {format(now, "EEEE, d MMM")}
+            {formatInTimeZone(now, weather.timezone || 'local', "EEEE, d MMM")}
           </div>
         </div>
 
