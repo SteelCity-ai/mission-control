@@ -470,7 +470,7 @@ export default function SystemMonitorPage() {
 
           {/* VPN & Firewall - Only show if Tailscale is available */}
           {systemData.tailscale.active && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Tailscale VPN */}
             <div className="p-6 rounded-xl" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
               <div className="flex items-center gap-3 mb-4">
@@ -549,7 +549,7 @@ export default function SystemMonitorPage() {
                 ))}
               </div>
             </div>
-          </div>
+            </div>
           )}
         </div>
       )}
