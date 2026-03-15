@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync } from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
 
