@@ -1,13 +1,51 @@
 /**
- * Weather API - Madrid
+ * Weather API
  * GET /api/weather
  * Uses Open-Meteo (free, no API key)
+ * Uses location from config (defaults to Pittsburgh)
  */
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+
+const CONFIG_PATH = path.join(process.cwd(), 'data', 'config.json');
 
 // Cache weather data for 10 minutes
 let cache: { data: unknown; ts: number } | null = null;
 const CACHE_DURATION = 10 * 60 * 1000;
+
+interface LocationConfig {
+  city: string;
+  timezone: string;
+  latitude: number;
+  longitude: number;
+}
+
+const DEFAULT_LOCATION: LocationConfig = {
+  city: 'Pittsburgh',
+  timezone: 'America/New_York',
+  latitude: 40.4406,
+  longitude: -79.9959,
+};
+
+function getLocationConfig(): LocationConfig {
+  try {
+    if (fs.existsSync(CONFIG_PATH)) {
+      const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+      if (config.location) {
+        return {
+          city: config.location.city || DEFAULT_LOCATION.city,
+          timezone: config.location.timezone || DEFAULT_LOCATION.timezone,
+          latitude: config.location.latitude ?? DEFAULT_LOCATION.latitude,
+          longitude: config.location.longitude ?? DEFAULT_LOCATION.longitude,
+        };
+      }
+    }
+  } catch (error) {
+    console.error('[weather] Error reading location config:', error);
+  }
+  return DEFAULT_LOCATION;
+}
 
 const WMO_CODES: Record<number, { label: string; emoji: string }> = {
   0: { label: "Clear sky", emoji: "☀️" },
@@ -40,8 +78,11 @@ export async function GET() {
   }
 
   try {
-    // Madrid coordinates: 40.4168° N, 3.7038° W
-    const url = 'https://api.open-meteo.com/v1/forecast?latitude=40.4168&longitude=-3.7038&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,precipitation&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Europe%2FMadrid&forecast_days=3';
+    // Get location from config
+    const location = getLocationConfig();
+    const timezone = encodeURIComponent(location.timezone);
+    
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,precipitation&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=${timezone}&forecast_days=3`;
 
     const res = await fetch(url, { next: { revalidate: 600 } });
     const json = await res.json();
@@ -52,7 +93,8 @@ export async function GET() {
     const wmo = WMO_CODES[current.weather_code] || { label: "Unknown", emoji: "🌡️" };
 
     const data = {
-      city: "Madrid",
+      city: location.city,
+      timezone: location.timezone,
       temp: Math.round(current.temperature_2m),
       feels_like: Math.round(current.apparent_temperature),
       humidity: current.relative_humidity_2m,

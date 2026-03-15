@@ -155,7 +155,7 @@ export default function SkillsPage() {
           />
           <input
             type="text"
-            placeholder="Buscar skills..."
+            placeholder="Search skills..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -191,7 +191,7 @@ export default function SkillsPage() {
               transition: "all 150ms ease",
             }}
           >
-            Todas ({skills.length})
+            All ({skills.length})
           </button>
           <button
             onClick={() => setFilterSource("workspace")}
@@ -554,7 +554,7 @@ function SkillDetailModal({ skill, onClose }: { skill: Skill; onClose: () => voi
               marginBottom: "12px",
             }}
           >
-            Archivos ({skill.files.length})
+            Files ({skill.files.length})
           </h3>
           <div
             style={{
@@ -587,4 +587,5 @@ function SkillDetailModal({ skill, onClose }: { skill: Skill; onClose: () => voi
       </div>
     </div>
   );
+}
 }

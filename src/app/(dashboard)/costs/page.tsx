@@ -19,7 +19,14 @@ interface CostData {
   byDay: Array<{ date: string; cost: number }>;
 }
 
-const COLORS = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#00C7BE', '#30B0C7', '#32ADE6', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
+interface TeamModel {
+  id: string;
+  name: string;
+  emoji: string;
+  model: string;
+  inputRate: number;
+  outputRate: number;
+}
 
 const MODEL_PRICES = {
   "minimax-m2.5": { input: 0.30, output: 1.10 },
@@ -34,10 +41,21 @@ const MODEL_PRICES = {
 
 export default function CostsPage() {
   const [costData, setCostData] = useState<CostData | null>(null);
+  const [teamModels, setTeamModels] = useState<TeamModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<"today" | "week" | "month">("month");
   const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [showLogCostModal, setShowLogCostModal] = useState(false);
   const [newBudget, setNewBudget] = useState(100);
+  
+  // Manual cost log form state
+  const [logForm, setLogForm] = useState({
+    agentId: "build",
+    model: "minimax/minimax-m2.5",
+    promptTokens: "",
+    completionTokens: "",
+    notes: "",
+  });
 
   useEffect(() => {
     fetchCostData();

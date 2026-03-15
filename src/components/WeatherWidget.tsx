@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Wind, Droplets, Thermometer } from "lucide-react";
 
@@ -13,6 +13,7 @@ interface Forecast {
 
 interface WeatherData {
   city: string;
+  timezone: string;
   temp: number;
   feels_like: number;
   humidity: number;
@@ -22,6 +23,38 @@ interface WeatherData {
   emoji: string;
   forecast: Forecast[];
   updated: string;
+}
+
+function formatInTimeZone(date: Date, timeZone: string, formatStr: string): string {
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: undefined,
+      weekday: 'long',
+      day: 'numeric',
+      month: 'short',
+      hour12: false,
+    });
+    
+    if (formatStr === 'HH:mm') {
+      const parts = formatter.formatToParts(date);
+      const hour = parts.find(p => p.type === 'hour')?.value || '00';
+      const minute = parts.find(p => p.type === 'minute')?.value || '00';
+      return `${hour}:${minute}`;
+    }
+    if (formatStr === 'EEEE, d MMM') {
+      const parts = formatter.formatToParts(date);
+      const weekday = parts.find(p => p.type === 'weekday')?.value || '';
+      const day = parts.find(p => p.type === 'day')?.value || '';
+      const month = parts.find(p => p.type === 'month')?.value || '';
+      return `${weekday}, ${day} ${month}`;
+    }
+  } catch {
+    // Fallback to local time
+  }
+  return format(date, formatStr);
 }
 
 export function WeatherWidget() {
