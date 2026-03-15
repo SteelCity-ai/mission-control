@@ -230,8 +230,11 @@ export default function ActivityPage() {
     };
   }, []);
 
+  // Use ref for offset to avoid infinite loop in useCallback
+  const offsetRef = useRef(0);
+
   const fetchActivities = useCallback(async (append = false) => {
-    const currentOffset = append ? offset : 0;
+    const currentOffset = append ? offsetRef.current : 0;
     
     if (append) {
       setLoadingMore(true);
@@ -279,7 +282,8 @@ export default function ActivityPage() {
       
       setTotal(data.total);
       setHasMore(data.hasMore);
-      setOffset(currentOffset + data.activities.length);
+      offsetRef.current = currentOffset + data.activities.length;
+      setOffset(offsetRef.current);
     } catch (error) {
       console.error("Failed to fetch activities:", error);
       if (!append) {
@@ -289,7 +293,7 @@ export default function ActivityPage() {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [offset, sort, selectedTypes, filterStatus, startDate, endDate]);
+  }, [sort, selectedTypes, filterStatus, startDate, endDate, limit]);
 
   useEffect(() => {
     setOffset(0);
