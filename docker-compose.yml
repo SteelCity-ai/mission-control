@@ -12,15 +12,22 @@ services:
       # Auth secrets - use Docker secrets or env files in production
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - AUTH_SECRET=${AUTH_SECRET}
+      - OPENCLAW_GATEWAY_URL=http://host.docker.internal:18789
     volumes:
       # Mount OpenClaw directory for read access
       - ${OPENCLAW_DIR:-/data/.openclaw}:/openclaw:ro
       # Persist data files ( SQLite, JSON, etc. )
       - mission-control-data:/app/data
+      # Tailscale socket for real VPN data
+      - /var/run/tailscale:/var/run/tailscale:ro
+      # Docker socket for container stats
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
     # Connect to OpenClaw's network if it exists
     networks:
       - openclaw-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
       interval: 30s

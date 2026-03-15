@@ -1,7 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Cpu, HardDrive, MemoryStick, Activity, Network, Server, ShieldCheck, RotateCw, Wifi, Monitor, Play, Square, X, Loader2, Terminal, ArrowDown, ArrowUp } from "lucide-react";
+import { Cpu, HardDrive, MemoryStick, Activity, Network, Server, ShieldCheck, RotateCw, Wifi, Monitor, Play, Square, X, Loader2, Terminal, ArrowDown, ArrowUp, Zap } from "lucide-react";
+
+interface RealSystemData {
+  tailscale: {
+    available: boolean;
+    ip?: string;
+    hostname?: string;
+    online?: boolean;
+    peerCount?: number;
+    error?: string;
+  };
+  gateway: {
+    available: boolean;
+    reachable?: boolean;
+    latencyMs?: number;
+    error?: string;
+  };
+  docker: {
+    available: boolean;
+    error?: string;
+  };
+}
 
 interface SystemdService {
   name: string;
@@ -64,6 +85,7 @@ function formatBytes(bytes: number): string {
 
 export default function SystemMonitorPage() {
   const [systemData, setSystemData] = useState<SystemData | null>(null);
+  const [realSystemData, setRealSystemData] = useState<RealSystemData | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [selectedTab, setSelectedTab] = useState<"hardware" | "services">("hardware");
@@ -74,11 +96,22 @@ export default function SystemMonitorPage() {
   useEffect(() => {
     const fetchSystemData = async () => {
       try {
-        const res = await fetch("/api/system/monitor");
-        if (res.ok) {
-          const data = await res.json();
+        // Fetch both monitor data and real system data in parallel
+        const [monitorRes, realRes] = await Promise.all([
+          fetch("/api/system/monitor"),
+          fetch("/api/system/real").catch(() => null),
+        ]);
+
+        if (monitorRes.ok) {
+          const data = await monitorRes.json();
           setSystemData(data);
           setLastUpdated(new Date());
+        }
+
+        // Handle real system data (may not be available)
+        if (realRes && realRes.ok) {
+          const realData = await realRes.json();
+          setRealSystemData(realData);
         }
       } catch (error) {
         console.error("Failed to fetch system data:", error);
@@ -469,32 +502,61 @@ export default function SystemMonitorPage() {
           </div>
 
           {/* VPN & Firewall - Only show if Tailscale is available */}
-          {systemData.tailscale.active && (
+          {(systemData.tailscale.active || (realSystemData?.tailscale?.available)) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Tailscale VPN */}
             <div className="p-6 rounded-xl" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-lg" style={{ backgroundColor: "var(--card-elevated)" }}>
-                  <Wifi className="w-5 h-5" style={{ color: systemData.tailscale.active ? "var(--success)" : "var(--error)" }} />
+                  <Wifi className="w-5 h-5" style={{ color: (realSystemData?.tailscale?.available && realSystemData.tailscale.online) ? "var(--success)" : systemData.tailscale.active ? "var(--success)" : "var(--error)" }} />
                 </div>
                 <div>
                   <h3 className="font-semibold" style={{ color: "var(--text-primary)" }}>Tailscale VPN</h3>
-                  <p className="text-sm" style={{ color: systemData.tailscale.active ? "var(--success)" : "var(--error)" }}>
-                    {systemData.tailscale.active ? "Active" : "Inactive"}
+                  <p className="text-sm" style={{ color: (realSystemData?.tailscale?.available && realSystemData.tailscale.online) ? "var(--success)" : systemData.tailscale.active ? "var(--success)" : "var(--error)" }}>
+                    {(realSystemData?.tailscale?.available && realSystemData.tailscale.online) ? "Active (Real)" : systemData.tailscale.active ? "Active" : "Inactive"}
                   </p>
                 </div>
               </div>
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm">
                   <span style={{ color: "var(--text-secondary)" }}>This server</span>
-                  <span className="font-mono" style={{ color: "var(--text-primary)" }}>{systemData.tailscale.ip}</span>
+                  <span className="font-mono" style={{ color: "var(--text-primary)" }}>{realSystemData?.tailscale?.available ? realSystemData.tailscale.ip || 'N/A' : systemData.tailscale.ip}</span>
                 </div>
+                {realSystemData?.tailscale?.available && realSystemData.tailscale.hostname && (
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: "var(--text-secondary)" }}>Hostname</span>
+                    <span className="font-mono" style={{ color: "var(--text-primary)" }}>{realSystemData.tailscale.hostname}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span style={{ color: "var(--text-secondary)" }}>Devices connected</span>
-                  <span style={{ color: "var(--text-primary)" }}>{systemData.tailscale.devices.length}</span>
+                  <span style={{ color: "var(--text-primary)" }}>{realSystemData?.tailscale?.available ? realSystemData.tailscale.peerCount : systemData.tailscale.devices.length}</span>
                 </div>
               </div>
-              {systemData.tailscale.devices.length > 0 && (
+              
+              {/* OpenClaw Gateway Status */}
+              {realSystemData?.gateway?.available && (
+                <div className="pt-3 mt-3" style={{ borderTop: "1px solid var(--border)" }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap className="w-4 h-4" style={{ color: realSystemData.gateway.reachable ? "var(--success)" : "var(--warning)" }} />
+                    <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>OpenClaw Gateway</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: "var(--text-secondary)" }}>Status</span>
+                    <span className="font-mono" style={{ color: realSystemData.gateway.reachable ? "var(--success)" : "var(--warning)" }}>
+                      {realSystemData.gateway.reachable ? "Reachable" : "Not reachable"}
+                    </span>
+                  </div>
+                  {realSystemData.gateway.latencyMs != null && (
+                    <div className="flex justify-between text-sm">
+                      <span style={{ color: "var(--text-secondary)" }}>Latency</span>
+                      <span className="font-mono" style={{ color: "var(--text-primary)" }}>{realSystemData.gateway.latencyMs}ms</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {systemData.tailscale.devices.length > 0 && !realSystemData?.tailscale?.available && (
                 <div className="space-y-2 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
                   {systemData.tailscale.devices.map((dev, i) => (
                     <div key={i} className="flex items-center justify-between text-xs">
@@ -509,6 +571,15 @@ export default function SystemMonitorPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* Show not available message when real data is not accessible */}
+              {!systemData.tailscale.active && realSystemData?.tailscale?.available === false && (
+                <div className="pt-3 mt-3" style={{ borderTop: "1px solid var(--border)" }}>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    Tailscale socket not mounted. Run with `-v /var/run/tailscale:/var/run/tailscale:ro` to enable.
+                  </p>
                 </div>
               )}
             </div>
