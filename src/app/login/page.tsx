@@ -31,7 +31,7 @@ function LoginForm() {
         router.push(from);
         router.refresh();
       } else {
-        setError("Contraseña incorrecta");
+        setError("Incorrect password");
       }
     } catch {
       setError("Connection error");
