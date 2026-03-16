@@ -10,7 +10,7 @@ interface Skill {
   id: string;
   name: string;
   description: string;
-  location: "built-in" | "workspace";
+  source: "system" | "workspace";
   path: string;
 }
 
@@ -61,7 +61,7 @@ async function scanSkillDir(dirPath: string, location: "built-in" | "workspace")
               id: entry.name,
               name: frontmatter.name,
               description: frontmatter.description || "No description provided.",
-              location,
+              source: location === "built-in" ? "system" : "workspace",
               path: skillDirPath,
             });
           }

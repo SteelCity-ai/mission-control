@@ -34,6 +34,10 @@ const V_GAP = 80;
 
 export function AgentOrganigrama({ agents }: AgentOrganigramaProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPan, setStartPan] = useState({ x: 0, y: 0 });
 
   if (agents.length === 0) {
     return (
@@ -158,7 +162,20 @@ export function AgentOrganigrama({ agents }: AgentOrganigramaProps) {
   }
 
   return (
-    <div style={{ overflowX: "auto", overflowY: "auto", padding: "1rem" }}>
+    <div 
+    style={{ overflow: "hidden", padding: "1rem", position: "relative", cursor: isDragging ? "grabbing" : "grab", height: "600px" }}
+    onWheel={(e) => { e.preventDefault(); const newZoom = Math.min(Math.max(0.2, zoom - e.deltaY * 0.001), 3); setZoom(newZoom); }}
+    onMouseDown={(e) => { setIsDragging(true); setStartPan({ x: e.clientX - pan.x, y: e.clientY - pan.y }); }}
+    onMouseMove={(e) => { if (!isDragging) return; setPan({ x: e.clientX - startPan.x, y: e.clientY - startPan.y }); }}
+    onMouseUp={() => setIsDragging(false)}
+    onMouseLeave={() => setIsDragging(false)}
+  >
+    <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: "8px", zIndex: 10 }}>
+      <button onClick={() => setZoom(z => Math.min(3, z + 0.2))} style={{ padding: "4px 8px", background: "var(--card)", border: "1px solid var(--border)", borderRadius: "4px", color: "var(--text-primary)" }}>+</button>
+      <button onClick={() => setZoom(z => Math.max(0.2, z - 0.2))} style={{ padding: "4px 8px", background: "var(--card)", border: "1px solid var(--border)", borderRadius: "4px", color: "var(--text-primary)" }}>-</button>
+      <button onClick={() => { setZoom(1); setPan({x:0, y:0}); }} style={{ padding: "4px 8px", background: "var(--card)", border: "1px solid var(--border)", borderRadius: "4px", color: "var(--text-primary)" }}>Reset</button>
+    </div>
+    <div style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, transformOrigin: "0 0", width: "100%", height: "100%", transition: isDragging ? "none" : "transform 0.1s" }}>
       <svg
         width={svgW}
         height={svgH}
