@@ -17,7 +17,7 @@ services:
       # Mount OpenClaw directory for read access
       - /docker/openclaw-cnvy/data/.openclaw:/openclaw:ro
       # Mount npm global for built-in skills
-      - /data/.npm-global:/data/.npm-global:ro
+      - /docker/openclaw-cnvy/data/.npm-global:/data/.npm-global:ro
       # Persist data files ( SQLite, JSON, etc. )
       - mission-control-data:/app/data
       # Tailscale socket for real VPN data
