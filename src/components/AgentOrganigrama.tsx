@@ -298,6 +298,7 @@ export function AgentOrganigrama({ agents }: AgentOrganigramaProps) {
           );
         })}
       </svg>
+    </div>
 
       {/* Legend */}
       <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", marginTop: "1rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
