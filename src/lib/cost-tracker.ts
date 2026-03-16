@@ -33,7 +33,7 @@ export interface CostSummary {
 // Load model rates from JSON file
 function getModelRates(): Record<string, { input: number; output: number }> {
   try {
-    return require("./model-rates.json");
+    return require("../data/model-rates.json");
   } catch {
     return { default: { input: 1.0, output: 5.0 } };
   }

@@ -588,4 +588,3 @@ function SkillDetailModal({ skill, onClose }: { skill: Skill; onClose: () => voi
     </div>
   );
 }
-}
