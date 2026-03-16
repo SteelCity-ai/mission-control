@@ -78,8 +78,8 @@ export function calculateCost(
  * Get the costs directory path
  */
 function getCostsDir(): string {
-  // Use /data/costs for persistent storage
-  const costsDir = process.env.COSTS_DIR || path.join(process.cwd(), "data", "costs");
+  // Use /data/costs for persistent storage (not in workspace)
+  const costsDir = process.env.COSTS_DIR || "/data/costs";
   
   if (!fs.existsSync(costsDir)) {
     fs.mkdirSync(costsDir, { recursive: true });
@@ -224,7 +224,7 @@ export function getCostSummary(
  */
 export function getBudgetConfig(): { monthly: number; alerts: boolean } {
   try {
-    const configPath = path.join(process.cwd(), "data", "costs-config.json");
+    const configPath = "/data/costs-config.json";
     if (fs.existsSync(configPath)) {
       return JSON.parse(fs.readFileSync(configPath, "utf-8"));
     }

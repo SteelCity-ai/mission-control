@@ -420,7 +420,7 @@ export default function MemoryPage() {
                     >
                       <div style={{ textAlign: "center" }}>
                         <Brain style={{ width: "64px", height: "64px", margin: "0 auto 16px", opacity: 0.3 }} />
-                        <p style={{ fontSize: "14px" }}>Selecciona un archivo para ver o editar</p>
+                        <p style={{ fontSize: "14px" }}>Select a file to view or edit</p>
                       </div>
                     </div>
                   )}
@@ -438,7 +438,7 @@ export default function MemoryPage() {
                 fontSize: "14px",
               }}
             >
-              Selecciona un workspace
+              Select a workspace
             </div>
           )}
         </main>

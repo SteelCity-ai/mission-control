@@ -92,7 +92,13 @@ export async function POST(request: NextRequest) {
     // Save config
     const fs = require("fs");
     const path = require("path");
-    const configPath = path.join(process.cwd(), "data", "costs-config.json");
+    const configPath = "/data/costs-config.json";
+    
+    // Ensure directory exists
+    const configDir = path.dirname(configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
     
     const config = {
       monthly: budget ?? DEFAULT_BUDGET,
