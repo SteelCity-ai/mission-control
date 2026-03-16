@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: mission-control
+    user: root
     ports:
       - "3001:3000"
     environment:
