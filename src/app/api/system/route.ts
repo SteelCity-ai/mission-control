@@ -27,69 +27,122 @@ function parseIdentityMd(): { name: string; creature: string; emoji: string } {
 }
 
 function getIntegrationStatus() {
-  const integrations = [];
-
-  // Telegram — read from openclaw.json (channels.telegram)
-  let telegramEnabled = false;
-  let telegramAccounts = 0;
+  const integrations: any[] = [];
+  
+  let openclawConfig: any = {};
   try {
-    const openclawConfigPath = path.join(os.homedir(), '.openclaw', 'openclaw.json');
-    const openclawConfig = JSON.parse(fs.readFileSync(openclawConfigPath, 'utf-8'));
-    const telegramConfig = openclawConfig?.channels?.telegram;
-    telegramEnabled = !!(telegramConfig?.enabled);
-    if (telegramConfig?.accounts) {
-      telegramAccounts = Object.keys(telegramConfig.accounts).length;
+    const defaultOpenclawDir = process.env.OPENCLAW_DIR || '/data/.openclaw';
+    const openclawConfigPath = path.join(defaultOpenclawDir, 'openclaw.json');
+    openclawConfig = JSON.parse(fs.readFileSync(openclawConfigPath, 'utf-8'));
+  } catch (e) {
+    try {
+      const openclawConfigPath = path.join(os.homedir(), '.openclaw', 'openclaw.json');
+      openclawConfig = JSON.parse(fs.readFileSync(openclawConfigPath, 'utf-8'));
+    } catch (e) {}
+  }
+
+  // Telegram
+  const telegramConfig = openclawConfig?.channels?.telegram;
+  let telegramConnected = false;
+  
+  if (telegramConfig) {
+    // Check if there's a token or botToken directly, or in accounts
+    if (telegramConfig.token || telegramConfig.botToken) {
+      telegramConnected = true;
+    } else if (telegramConfig.accounts && Object.keys(telegramConfig.accounts).length > 0) {
+      telegramConnected = true;
     }
-  } catch {}
+  }
+  
   integrations.push({
     id: 'telegram',
     name: 'Telegram',
-    status: telegramEnabled ? 'connected' : 'disconnected',
-    icon: 'MessageCircle',
-    lastActivity: telegramEnabled ? new Date().toISOString() : null,
-    detail: telegramEnabled ? `${telegramAccounts} bots configured` : null,
+    status: telegramConnected ? 'connected' : 'disconnected',
+    icon: 'telegram',
+    lastActivity: telegramConnected ? new Date().toISOString() : null,
   });
 
-  // Twitter (bird CLI) - check TOOLS.md for configuration
-  let twitterConfigured = false;
-  try {
-    const toolsPath = path.join(WORKSPACE_PATH, 'TOOLS.md');
-    const toolsContent = fs.readFileSync(toolsPath, 'utf-8');
-    twitterConfigured = toolsContent.includes('bird') && toolsContent.includes('auth_token');
-  } catch {}
-  integrations.push({
-    id: 'twitter',
-    name: 'Twitter (bird CLI)',
-    status: twitterConfigured ? 'configured' : 'not_configured',
-    icon: 'Twitter',
-    lastActivity: null,
-    detail: null,
-  });
-
-  // Google (gog/google-gemini-cli-auth) — check openclaw.json plugins
-  let googleConfigured = false;
-  let googleDetail: string | null = null;
-  try {
-    const openclawConfigPath = path.join(os.homedir(), '.openclaw', 'openclaw.json');
-    const openclawConfig = JSON.parse(fs.readFileSync(openclawConfigPath, 'utf-8'));
-    const gogPlugin = openclawConfig?.plugins?.entries?.['google-gemini-cli-auth'];
-    googleConfigured = !!(gogPlugin?.enabled);
-    if (googleConfigured) googleDetail = 'google-gemini-cli-auth plugin enabled';
-  } catch {}
-  // Fallback: check for gog config directory
-  if (!googleConfigured) {
-    try {
-      const gogPath = path.join(os.homedir(), '.config', 'gog');
-      googleConfigured = fs.existsSync(gogPath);
-    } catch {}
+  // WhatsApp
+  const whatsappConfig = openclawConfig?.channels?.whatsapp;
+  let whatsappConnected = false;
+  if (whatsappConfig && (whatsappConfig.token || whatsappConfig.accounts && Object.keys(whatsappConfig.accounts).length > 0)) {
+    whatsappConnected = true;
   }
+  
   integrations.push({
-    id: 'google',
-    name: 'Google (GOG)',
-    status: googleConfigured ? 'configured' : 'not_configured',
-    icon: 'Mail',
-    lastActivity: null,
-    detail: googleDetail,
+    id: 'whatsapp',
+    name: 'WhatsApp',
+    status: whatsappConnected ? 'connected' : 'disconnected',
+    icon: 'whatsapp',
+    lastActivity: whatsappConnected ? new Date().toISOString() : null,
+  });
+  
+  // Discord
+  const discordConfig = openclawConfig?.channels?.discord;
+  let discordConnected = false;
+  if (discordConfig && (discordConfig.token || discordConfig.botToken || discordConfig.accounts && Object.keys(discordConfig.accounts).length > 0)) {
+    discordConnected = true;
+  }
+  
+  integrations.push({
+    id: 'discord',
+    name: 'Discord',
+    status: discordConnected ? 'connected' : 'disconnected',
+    icon: 'discord',
+    lastActivity: discordConnected ? new Date().toISOString() : null,
+  });
+  
+  // Slack
+  const slackConfig = openclawConfig?.channels?.slack;
+  let slackConnected = false;
+  if (slackConfig && (slackConfig.token || slackConfig.botToken || slackConfig.accounts && Object.keys(slackConfig.accounts).length > 0)) {
+    slackConnected = true;
+  }
+  
+  integrations.push({
+    id: 'slack',
+    name: 'Slack',
+    status: slackConnected ? 'connected' : 'disconnected',
+    icon: 'slack',
+    lastActivity: slackConnected ? new Date().toISOString() : null,
+  });
+  
+  // Signal
+  const signalConfig = openclawConfig?.channels?.signal;
+  let signalConnected = false;
+  if (signalConfig && (signalConfig.number || signalConfig.accounts && Object.keys(signalConfig.accounts).length > 0)) {
+    signalConnected = true;
+  }
+  
+  integrations.push({
+    id: 'signal',
+    name: 'Signal',
+    status: signalConnected ? 'connected' : 'disconnected',
+    icon: 'signal',
+    lastActivity: signalConnected ? new Date().toISOString() : null,
+  });
+  
+  // Email (Himalaya)
+  let emailConnected = false;
+  try {
+    const himalayaConfigPath = path.join(os.homedir(), '.config', 'himalaya', 'config.toml');
+    if (fs.existsSync(himalayaConfigPath)) {
+      emailConnected = true;
+    } else {
+      // Fallback to check default openclaw mount path if running in docker
+      const dockerConfigPath = '/root/.config/himalaya/config.toml';
+      if (fs.existsSync(dockerConfigPath)) {
+        emailConnected = true;
+      }
+    }
+  } catch (e) {}
+  
+  integrations.push({
+    id: 'email',
+    name: 'Email (Himalaya)',
+    status: emailConnected ? 'connected' : 'disconnected',
+    icon: 'mail',
+    lastActivity: emailConnected ? new Date().toISOString() : null,
   });
 
   return integrations;
