@@ -15,7 +15,9 @@ services:
       - OPENCLAW_GATEWAY_URL=http://host.docker.internal:18789
     volumes:
       # Mount OpenClaw directory for read access
-      - ${OPENCLAW_DIR:-/data/.openclaw}:/openclaw:ro
+      - /docker/openclaw-cnvy/data/.openclaw:/openclaw:ro
+      # Mount npm global for built-in skills
+      - /data/.npm-global:/data/.npm-global:ro
       # Persist data files ( SQLite, JSON, etc. )
       - mission-control-data:/app/data
       # Tailscale socket for real VPN data
