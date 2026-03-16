@@ -394,6 +394,51 @@ export default function CostsPage() {
         </div>
       </div>
 
+      {/* Team Models Section */}
+      <div className="p-6 rounded-xl" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
+        <h3 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>
+          Team Models
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                <th className="text-left py-3 px-4 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Agent</th>
+                <th className="text-left py-3 px-4 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Model</th>
+                <th className="text-right py-3 px-4 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Input ($/M)</th>
+                <th className="text-right py-3 px-4 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Output ($/M)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { agent: "main", model: "openrouter/hunter-alpha", input: 0, output: 0 },
+                { agent: "foreman", model: "openrouter/minimax/minimax-m2.5", input: 0.25, output: 1.10 },
+                { agent: "research", model: "openrouter/minimax/minimax-m2.5", input: 0.25, output: 1.10 },
+                { agent: "architect", model: "openrouter/google/gemini-3.1-pro-preview", input: 2.00, output: 12.00 },
+                { agent: "build", model: "openrouter/minimax/minimax-m2.5", input: 0.25, output: 1.10 },
+                { agent: "design", model: "openrouter/google/gemini-3-flash-preview", input: 0.50, output: 3.00 },
+                { agent: "qa", model: "openrouter/hunter-alpha", input: 0, output: 0 },
+                { agent: "growth", model: "openrouter/minimax/minimax-m2.5", input: 0.25, output: 1.10 },
+                { agent: "reporter", model: "openrouter/healer-alpha", input: 0, output: 0 },
+                { agent: "pm-sync", model: "openrouter/minimax/minimax-m2.5", input: 0.25, output: 1.10 },
+                { agent: "macgyver", model: "openrouter/minimax/minimax-m2.5", input: 0.25, output: 1.10 },
+              ].map((tm) => (
+                <tr key={tm.agent} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td className="py-3 px-4">
+                    <span className="font-medium" style={{ color: "var(--text-primary)" }}>{tm.agent}</span>
+                  </td>
+                  <td className="py-3 px-4" style={{ color: "var(--text-secondary)" }}>
+                    {tm.model.replace("openrouter/", "")}
+                  </td>
+                  <td className="py-3 px-4 text-right" style={{ color: "var(--text-primary)" }}>${tm.input.toFixed(2)}</td>
+                  <td className="py-3 px-4 text-right" style={{ color: "var(--text-primary)" }}>${tm.output.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Detailed table by agent */}
       <div className="p-6 rounded-xl" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
         <h3 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>
@@ -413,7 +458,9 @@ export default function CostsPage() {
               </thead>
               <tbody>
                 {costData.byAgent.map((agent) => {
-                  const percent = costData.totalCost > 0 ? (agent.cost / costData.totalCost) * 100 : 0;
+                  const total = costData.totalCost || 0;
+                  const percent = total > 0 ? (agent.cost / total) * 100 : 0;
+                  const percentDisplay = isNaN(percent) || !isFinite(percent) ? "—" : `${percent.toFixed(1)}%`;
                   return (
                     <tr key={agent.agent} style={{ borderBottom: "1px solid var(--border)" }}>
                       <td className="py-3 px-4">
@@ -429,7 +476,7 @@ export default function CostsPage() {
                         ${agent.cost.toFixed(2)}
                       </td>
                       <td className="py-3 px-4 text-right" style={{ color: "var(--text-secondary)" }}>
-                        {percent.toFixed(1)}%
+                        {percentDisplay}
                       </td>
                     </tr>
                   );
