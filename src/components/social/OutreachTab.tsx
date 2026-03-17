@@ -49,7 +49,11 @@ function initComments(): CommentEntry[] {
   }));
 }
 
-export function OutreachTab() {
+interface OutreachTabProps {
+  clientId: string;
+}
+
+export function OutreachTab({ clientId }: OutreachTabProps) {
   const today = new Date().toISOString().split("T")[0];
   const [likes, setLikes] = useState<LikeEntry[]>(initLikes());
   const [comments, setComments] = useState<CommentEntry[]>(initComments());
@@ -61,7 +65,7 @@ export function OutreachTab() {
 
   // Load today's data
   useEffect(() => {
-    fetch(`/api/social/outreach?date=${today}`)
+    fetch(`/api/social/outreach?clientId=${clientId}&date=${today}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data: DailyOutreach | null) => {
         if (!data) return;
@@ -98,7 +102,7 @@ export function OutreachTab() {
     if (historyLoading || historicalLogs.length > 0) return;
     setHistoryLoading(true);
     try {
-      const res = await fetch("/api/social/outreach");
+      const res = await fetch(`/api/social/outreach?clientId=${clientId}`);
       if (res.ok) {
         const data = await res.json();
         setHistoricalLogs(
@@ -125,13 +129,13 @@ export function OutreachTab() {
     setSaving(key);
     try {
       // Ensure today's log exists
-      await fetch("/api/social/outreach", {
+      await fetch(`/api/social/outreach?clientId=${clientId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: today }),
+        body: JSON.stringify({ date: today, clientId }),
       });
 
-      const res = await fetch(`/api/social/outreach/${today}`, {
+      const res = await fetch(`/api/social/outreach/${today}?clientId=${clientId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -176,13 +180,13 @@ export function OutreachTab() {
     const key = `comment-${index}`;
     setSaving(key);
     try {
-      await fetch("/api/social/outreach", {
+      await fetch(`/api/social/outreach?clientId=${clientId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: today }),
+        body: JSON.stringify({ date: today, clientId }),
       });
 
-      const res = await fetch(`/api/social/outreach/${today}`, {
+      const res = await fetch(`/api/social/outreach/${today}?clientId=${clientId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

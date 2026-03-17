@@ -9,6 +9,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onCreated: (post: SocialPost) => void;
+  clientId: string;
 }
 
 const PLATFORMS: Platform[] = ["facebook", "instagram", "nextdoor", "gmb"];
@@ -16,7 +17,7 @@ const PILLARS: Array<{ id: NonNullable<Pillar>; label: string }> = Object.entrie
   PILLAR_NAMES
 ).map(([id, label]) => ({ id: id as NonNullable<Pillar>, label }));
 
-export function NewPostDrawer({ open, onClose, onCreated }: Props) {
+export function NewPostDrawer({ open, onClose, onCreated, clientId }: Props) {
   const today = new Date().toISOString().split("T")[0];
   const [platform, setPlatform] = useState<Platform>("facebook");
   const [content, setContent] = useState("");
@@ -64,6 +65,7 @@ export function NewPostDrawer({ open, onClose, onCreated }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          clientId,
           platform,
           content: content.trim(),
           pillar: pillar || null,

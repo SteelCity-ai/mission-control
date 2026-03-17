@@ -14,28 +14,34 @@ interface ReminderData {
   }>;
 }
 
-export function SocialMorningBanner() {
+interface SocialMorningBannerProps {
+  clientId?: string | null;
+}
+
+export function SocialMorningBanner({ clientId }: SocialMorningBannerProps) {
   const [data, setData] = useState<ReminderData | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
+    if (!clientId) return;
+
     // Check if already dismissed today
-    const dismissedDate = sessionStorage.getItem("social-banner-dismissed");
+    const dismissedDate = sessionStorage.getItem(`social-banner-dismissed-${clientId}`);
     const today = new Date().toISOString().split("T")[0];
     if (dismissedDate === today) {
       setDismissed(true);
       return;
     }
 
-    fetch("/api/social/reminder")
-      .then((r) => r.json())
-      .then((d) => setData(d))
+    fetch(`/api/social/reminder?clientId=${clientId}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => d && setData(d))
       .catch(() => null);
-  }, []);
+  }, [clientId]);
 
   const handleDismiss = () => {
     const today = new Date().toISOString().split("T")[0];
-    sessionStorage.setItem("social-banner-dismissed", today);
+    sessionStorage.setItem(`social-banner-dismissed-${clientId}`, today);
     setDismissed(true);
   };
 

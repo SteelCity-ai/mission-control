@@ -7,10 +7,11 @@ import { PLATFORM_LABELS, PLATFORM_COLORS } from "@/lib/social/types";
 import { PostStatusBadge } from "./PostStatusBadge";
 
 interface Props {
+  clientId: string;
   onRefresh?: () => void;
 }
 
-export function OverviewTab({ onRefresh }: Props) {
+export function OverviewTab({ clientId, onRefresh }: Props) {
   const today = new Date().toISOString().split("T")[0];
   const [approvedPosts, setApprovedPosts] = useState<SocialPost[]>([]);
   const [outreach, setOutreach] = useState<DailyOutreach | null>(null);
@@ -21,8 +22,8 @@ export function OverviewTab({ onRefresh }: Props) {
     setLoading(true);
     try {
       const [postsRes, outreachRes] = await Promise.allSettled([
-        fetch(`/api/social/posts?startDate=${today}&endDate=${today}&status=approved`),
-        fetch(`/api/social/outreach?date=${today}`),
+        fetch(`/api/social/posts?clientId=${clientId}&startDate=${today}&endDate=${today}&status=approved`),
+        fetch(`/api/social/outreach?clientId=${clientId}&date=${today}`),
       ]);
 
       if (postsRes.status === "fulfilled" && postsRes.value.ok) {
@@ -46,10 +47,10 @@ export function OverviewTab({ onRefresh }: Props) {
   const handleMarkPosted = async (postId: string) => {
     setMarkingId(postId);
     try {
-      const res = await fetch(`/api/social/posts/${postId}/status`, {
+      const res = await fetch(`/api/social/posts/${postId}/status?clientId=${clientId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "posted" }),
+        body: JSON.stringify({ status: "posted", clientId }),
       });
       if (res.ok) {
         setApprovedPosts((prev) => prev.filter((p) => p.id !== postId));
