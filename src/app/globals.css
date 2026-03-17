@@ -149,6 +149,13 @@
   --radius-xl: 16px;
   --radius-full: 9999px;
 
+  /* ── Social Content Pillars (SC-SOCIAL-004) ── */
+  --pillar-humane: #22C55E;
+  --pillar-expert: #3B82F6;
+  --pillar-contract: #EF4444;
+  --pillar-trust: #F97316;
+  --pillar-team: #8B5CF6;
+
   /* ── Shadows ── */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
