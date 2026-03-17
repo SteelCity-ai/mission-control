@@ -1,16 +1,35 @@
 /**
  * PATCH /api/social/outreach/[date] — update outreach entry (add likes/comments, update notes)
+ * clientId must be in the request body
  *
  * Body options:
- * - { action: "add_like", account: "@handle", url?: "..." }
- * - { action: "add_comment", account: "@handle", text: "...", url?: "..." }
- * - { action: "update", notes?: "...", completed?: boolean }
+ * - { clientId, action: "add_like", account: "@handle", url?: "..." }
+ * - { clientId, action: "add_comment", account: "@handle", text: "...", url?: "..." }
+ * - { clientId, action: "update", notes?: "...", completed?: boolean }
+ *
+ * SC-CLIENT-005: Updated to require clientId
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { addLike, addComment, updateOutreach } from '@/lib/social/fileService';
+import { requireActiveClient } from '@/lib/social/clientService';
 
 function errorResponse(code: string, message: string, status: number) {
   return NextResponse.json({ error: { code, message } }, { status });
+}
+
+function clientErrorResponse(err: unknown) {
+  if (err instanceof Error) {
+    if (err.message === 'CLIENT_MISSING') {
+      return errorResponse('CLIENT_MISSING', 'clientId is required', 400);
+    }
+    if (err.message.startsWith('CLIENT_NOT_FOUND')) {
+      return errorResponse('CLIENT_NOT_FOUND', 'Client not found', 404);
+    }
+    if (err.message.startsWith('CLIENT_ARCHIVED')) {
+      return errorResponse('CLIENT_ARCHIVED', 'Client is archived', 404);
+    }
+  }
+  return null;
 }
 
 export async function PATCH(
@@ -25,7 +44,13 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { action } = body;
+    const { clientId, action } = body;
+
+    try {
+      await requireActiveClient(clientId);
+    } catch (err) {
+      return clientErrorResponse(err) ?? errorResponse('INTERNAL_ERROR', 'Failed to validate client', 500);
+    }
 
     if (!action) {
       return errorResponse('VALIDATION_FAILED', 'action is required', 400);
@@ -35,7 +60,7 @@ export async function PATCH(
       case 'add_like': {
         const { account, url } = body;
         if (!account) return errorResponse('VALIDATION_FAILED', 'account is required for add_like', 400);
-        const updated = await addLike(date, { account, url });
+        const updated = await addLike(clientId, date, { account, url });
         return NextResponse.json(updated);
       }
 
@@ -53,13 +78,13 @@ export async function PATCH(
           );
         }
 
-        const updated = await addComment(date, { account, text, url });
+        const updated = await addComment(clientId, date, { account, text, url });
         return NextResponse.json(updated);
       }
 
       case 'update': {
         const { notes, completed } = body;
-        const updated = await updateOutreach(date, { notes, completed });
+        const updated = await updateOutreach(clientId, date, { notes, completed });
         return NextResponse.json(updated);
       }
 

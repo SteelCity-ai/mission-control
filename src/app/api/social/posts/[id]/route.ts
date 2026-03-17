@@ -1,24 +1,56 @@
 /**
- * GET /api/social/posts/[id]    — get single post
- * PATCH /api/social/posts/[id]  — update post (draft/review only)
- * DELETE /api/social/posts/[id] — soft delete
+ * GET /api/social/posts/[id]?clientId=    — get single post
+ * PATCH /api/social/posts/[id]            — update post (clientId in body)
+ * DELETE /api/social/posts/[id]?clientId= — soft delete
+ *
+ * SC-CLIENT-005: Updated to require clientId
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getPost, updatePost, softDeletePost } from '@/lib/social/fileService';
-import type { Pillar, Platform } from '@/lib/social/types';
+import { requireActiveClient } from '@/lib/social/clientService';
+import type { Pillar } from '@/lib/social/types';
 
 function errorResponse(code: string, message: string, status: number) {
   return NextResponse.json({ error: { code, message } }, { status });
 }
 
+function clientErrorResponse(err: unknown) {
+  if (err instanceof Error) {
+    if (err.message === 'CLIENT_MISSING') {
+      return errorResponse('CLIENT_MISSING', 'clientId is required', 400);
+    }
+    if (err.message.startsWith('CLIENT_NOT_FOUND')) {
+      return errorResponse('CLIENT_NOT_FOUND', 'Client not found', 404);
+    }
+    if (err.message.startsWith('CLIENT_ARCHIVED')) {
+      return errorResponse('CLIENT_ARCHIVED', 'Client is archived', 404);
+    }
+  }
+  return null;
+}
+
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const post = await getPost(id);
+    const clientId = req.nextUrl.searchParams.get('clientId') ?? '';
+
+    try {
+      await requireActiveClient(clientId);
+    } catch (err) {
+      return clientErrorResponse(err) ?? errorResponse('INTERNAL_ERROR', 'Failed to validate client', 500);
+    }
+
+    const post = await getPost(clientId, id);
     if (!post) return errorResponse('NOT_FOUND', `Post ${id} not found`, 404);
+
+    // Validate the post belongs to this client
+    if (post.clientId !== clientId) {
+      return errorResponse('NOT_FOUND', `Post ${id} not found`, 404);
+    }
+
     return NextResponse.json(post);
   } catch (err) {
     console.error('[GET /api/social/posts/[id]]', err);
@@ -33,7 +65,13 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { content, pillar, scheduledDate, notes, tags } = body;
+    const { clientId, content, pillar, scheduledDate, notes, tags } = body;
+
+    try {
+      await requireActiveClient(clientId);
+    } catch (err) {
+      return clientErrorResponse(err) ?? errorResponse('INTERNAL_ERROR', 'Failed to validate client', 500);
+    }
 
     // Validate content if provided
     if (content !== undefined && content.length > 2000) {
@@ -48,7 +86,13 @@ export async function PATCH(
       }
     }
 
-    const updated = await updatePost(id, { content, pillar, scheduledDate, notes, tags });
+    // Verify post belongs to client
+    const existingPost = await getPost(clientId, id);
+    if (!existingPost || existingPost.clientId !== clientId) {
+      return errorResponse('NOT_FOUND', `Post ${id} not found`, 404);
+    }
+
+    const updated = await updatePost(clientId, id, { content, pillar: pillar as Pillar, scheduledDate, notes, tags });
     return NextResponse.json(updated);
   } catch (err: unknown) {
     console.error('[PATCH /api/social/posts/[id]]', err);
@@ -60,12 +104,26 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const deleted = await softDeletePost(id);
+    const clientId = req.nextUrl.searchParams.get('clientId') ?? '';
+
+    try {
+      await requireActiveClient(clientId);
+    } catch (err) {
+      return clientErrorResponse(err) ?? errorResponse('INTERNAL_ERROR', 'Failed to validate client', 500);
+    }
+
+    // Verify post belongs to client
+    const existingPost = await getPost(clientId, id);
+    if (!existingPost || existingPost.clientId !== clientId) {
+      return errorResponse('NOT_FOUND', `Post ${id} not found`, 404);
+    }
+
+    const deleted = await softDeletePost(clientId, id);
     return NextResponse.json({ success: true, post: deleted });
   } catch (err: unknown) {
     console.error('[DELETE /api/social/posts/[id]]', err);
