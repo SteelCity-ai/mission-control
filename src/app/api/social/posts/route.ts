@@ -1,9 +1,12 @@
 /**
- * GET /api/social/posts  — list posts (filter by ?week=YYYY-Www or ?startDate&endDate)
- * POST /api/social/posts — create new post
+ * GET /api/social/posts?clientId=  — list posts (filter by ?week=YYYY-Www or ?startDate&endDate)
+ * POST /api/social/posts            — create new post (clientId required in body)
+ *
+ * SC-CLIENT-005: Updated to require clientId
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { listPosts, createPost } from '@/lib/social/fileService';
+import { requireActiveClient } from '@/lib/social/clientService';
 import type { Platform, Pillar, PostStatus } from '@/lib/social/types';
 
 // ── Error helper ──────────────────────────────────────────────────────────────
@@ -11,16 +14,40 @@ function errorResponse(code: string, message: string, status: number, details?: 
   return NextResponse.json({ error: { code, message, details } }, { status });
 }
 
+function clientErrorResponse(err: unknown) {
+  if (err instanceof Error) {
+    if (err.message === 'CLIENT_MISSING') {
+      return errorResponse('CLIENT_MISSING', 'clientId is required', 400);
+    }
+    if (err.message.startsWith('CLIENT_NOT_FOUND')) {
+      return errorResponse('CLIENT_NOT_FOUND', `Client not found`, 404);
+    }
+    if (err.message.startsWith('CLIENT_ARCHIVED')) {
+      return errorResponse('CLIENT_ARCHIVED', `Client is archived`, 404);
+    }
+  }
+  return null;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
+    const clientId = searchParams.get('clientId') ?? '';
+
+    // Validate client
+    try {
+      await requireActiveClient(clientId);
+    } catch (err) {
+      return clientErrorResponse(err) ?? errorResponse('INTERNAL_ERROR', 'Failed to validate client', 500);
+    }
+
     const week = searchParams.get('week') ?? undefined;
     const startDate = searchParams.get('startDate') ?? undefined;
     const endDate = searchParams.get('endDate') ?? undefined;
     const status = (searchParams.get('status') ?? undefined) as PostStatus | undefined;
     const platform = (searchParams.get('platform') ?? undefined) as Platform | undefined;
 
-    const posts = await listPosts({ week, startDate, endDate, status, platform });
+    const posts = await listPosts({ clientId, week, startDate, endDate, status, platform });
     return NextResponse.json({ posts, count: posts.length });
   } catch (err) {
     console.error('[GET /api/social/posts]', err);
@@ -32,8 +59,14 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Validate required fields
-    const { platform, content, scheduledDate, pillar, notes, tags } = body;
+    // Validate clientId
+    const { clientId, platform, content, scheduledDate, pillar, notes, tags } = body;
+
+    try {
+      await requireActiveClient(clientId);
+    } catch (err) {
+      return clientErrorResponse(err) ?? errorResponse('INTERNAL_ERROR', 'Failed to validate client', 500);
+    }
 
     if (!platform) return errorResponse('VALIDATION_FAILED', 'platform is required', 400);
     if (!content) return errorResponse('VALIDATION_FAILED', 'content is required', 400);
@@ -75,6 +108,7 @@ export async function POST(req: NextRequest) {
     }
 
     const post = await createPost({
+      clientId,
       platform,
       content,
       scheduledDate,

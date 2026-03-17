@@ -24,14 +24,24 @@ import type {
 import {
   STATUS_TRANSITIONS,
   PILLAR_NAMES,
-  CLIENT_ID,
 } from './types';
 
 // ── Base paths ──────────────────────────────────────────────────────────────
 
-const DATA_BASE = '/data/mission-control-data/clients/absolute-pest-services';
-const POSTS_BASE = path.join(DATA_BASE, 'social-posts');
-const OUTREACH_BASE = path.join(DATA_BASE, 'outreach');
+const CLIENTS_DATA_BASE = '/data/mission-control-data/clients';
+
+/** Get data base dir for a given clientId */
+function getDataBase(clientId: string): string {
+  return path.join(CLIENTS_DATA_BASE, clientId);
+}
+
+function getPostsBase(clientId: string): string {
+  return path.join(getDataBase(clientId), 'social-posts');
+}
+
+function getOutreachBase(clientId: string): string {
+  return path.join(getDataBase(clientId), 'outreach');
+}
 
 // ── Utility: ensure directory exists ────────────────────────────────────────
 
@@ -57,31 +67,31 @@ async function writeJson(filePath: string, data: unknown): Promise<void> {
 
 // ── Helpers: paths ───────────────────────────────────────────────────────────
 
-function getPostsDayPath(date: string): string {
+function getPostsDayPath(clientId: string, date: string): string {
   // date: YYYY-MM-DD
   const [year, month] = date.split('-');
-  return path.join(POSTS_BASE, year, month, `posts-${date}.json`);
+  return path.join(getPostsBase(clientId), year, month, `posts-${date}.json`);
 }
 
-function getOutreachDayPath(date: string): string {
+function getOutreachDayPath(clientId: string, date: string): string {
   const [year, month] = date.split('-');
-  return path.join(OUTREACH_BASE, year, month, `outreach-${date}.json`);
+  return path.join(getOutreachBase(clientId), year, month, `outreach-${date}.json`);
 }
 
-function getPostIndexPath(): string {
-  return path.join(POSTS_BASE, 'index.json');
+function getPostIndexPath(clientId: string): string {
+  return path.join(getPostsBase(clientId), 'index.json');
 }
 
-function getPostCurrentPath(): string {
-  return path.join(POSTS_BASE, 'current.json');
+function getPostCurrentPath(clientId: string): string {
+  return path.join(getPostsBase(clientId), 'current.json');
 }
 
-function getOutreachIndexPath(): string {
-  return path.join(OUTREACH_BASE, 'index.json');
+function getOutreachIndexPath(clientId: string): string {
+  return path.join(getOutreachBase(clientId), 'index.json');
 }
 
-function getOutreachCurrentPath(): string {
-  return path.join(OUTREACH_BASE, 'current.json');
+function getOutreachCurrentPath(clientId: string): string {
+  return path.join(getOutreachBase(clientId), 'current.json');
 }
 
 // ── Week helpers ─────────────────────────────────────────────────────────────
@@ -143,8 +153,8 @@ function getDatesInRange(start: string, end: string): string[] {
 /**
  * Read all posts from a given daily file.
  */
-async function readDayPosts(date: string): Promise<SocialPost[]> {
-  const filePath = getPostsDayPath(date);
+async function readDayPosts(clientId: string, date: string): Promise<SocialPost[]> {
+  const filePath = getPostsDayPath(clientId, date);
   const data = await readJson<{ date: string; posts: SocialPost[] }>(filePath);
   return data?.posts ?? [];
 }
@@ -152,18 +162,18 @@ async function readDayPosts(date: string): Promise<SocialPost[]> {
 /**
  * Write posts array to a given daily file.
  */
-async function writeDayPosts(date: string, posts: SocialPost[]): Promise<void> {
-  const filePath = getPostsDayPath(date);
+async function writeDayPosts(clientId: string, date: string, posts: SocialPost[]): Promise<void> {
+  const filePath = getPostsDayPath(clientId, date);
   await writeJson(filePath, { date, posts });
 }
 
 /**
  * Read post index.
  */
-export async function readPostIndex(): Promise<SocialPostIndex> {
-  const data = await readJson<SocialPostIndex>(getPostIndexPath());
+export async function readPostIndex(clientId: string): Promise<SocialPostIndex> {
+  const data = await readJson<SocialPostIndex>(getPostIndexPath(clientId));
   return data ?? {
-    clientId: CLIENT_ID,
+    clientId,
     totalPosts: 0,
     statsByStatus: { draft: 0, review: 0, approved: 0, posted: 0 },
     lastUpdated: new Date().toISOString(),
@@ -172,27 +182,9 @@ export async function readPostIndex(): Promise<SocialPostIndex> {
 }
 
 /**
- * Rebuild and save post index from existing posts (full rebuild).
- */
-async function rebuildPostIndex(): Promise<SocialPostIndex> {
-  const index = await readPostIndex();
-  // Recalculate stats from existing entries
-  const stats: SocialPostIndex['statsByStatus'] = { draft: 0, review: 0, approved: 0, posted: 0 };
-  const activePosts = index.posts.filter((p) => !p.deleted);
-  for (const p of activePosts) {
-    if (p.status in stats) stats[p.status]++;
-  }
-  index.statsByStatus = stats;
-  index.totalPosts = activePosts.length;
-  index.lastUpdated = new Date().toISOString();
-  await writeJson(getPostIndexPath(), index);
-  return index;
-}
-
-/**
  * Regenerate current.json (today + this week snapshots).
  */
-async function regeneratePostCurrent(today?: string): Promise<void> {
+async function regeneratePostCurrent(clientId: string, today?: string): Promise<void> {
   const todayStr = today ?? new Date().toISOString().split('T')[0];
   const { start, end } = getWeekRange(todayStr);
   const dates = getDatesInRange(start, end);
@@ -203,7 +195,7 @@ async function regeneratePostCurrent(today?: string): Promise<void> {
   const reviewPosts: SocialPost[] = [];
 
   for (const date of dates) {
-    const dayPosts = await readDayPosts(date);
+    const dayPosts = await readDayPosts(clientId, date);
     for (const post of dayPosts) {
       if (post.deleted) continue;
       thisWeeksPosts.push(post);
@@ -214,7 +206,7 @@ async function regeneratePostCurrent(today?: string): Promise<void> {
   }
 
   const current = {
-    clientId: CLIENT_ID,
+    clientId,
     generatedAt: new Date().toISOString(),
     today: todayStr,
     thisWeekRange: `${start} to ${end}`,
@@ -224,14 +216,14 @@ async function regeneratePostCurrent(today?: string): Promise<void> {
     reviewPosts,
   };
 
-  await writeJson(getPostCurrentPath(), current);
+  await writeJson(getPostCurrentPath(clientId), current);
 }
 
 /**
  * Add or update a post entry in the index.
  */
-async function upsertPostInIndex(post: SocialPost): Promise<void> {
-  const index = await readPostIndex();
+async function upsertPostInIndex(clientId: string, post: SocialPost): Promise<void> {
+  const index = await readPostIndex(clientId);
   const entry: SocialPostIndexEntry = {
     id: post.id,
     platform: post.platform,
@@ -259,12 +251,13 @@ async function upsertPostInIndex(post: SocialPost): Promise<void> {
   index.totalPosts = activePosts.length;
   index.lastUpdated = new Date().toISOString();
 
-  await writeJson(getPostIndexPath(), index);
+  await writeJson(getPostIndexPath(clientId), index);
 }
 
 // ── Public API: Posts ────────────────────────────────────────────────────────
 
 export interface ListPostsOptions {
+  clientId: string;
   week?: string; // YYYY-Www
   startDate?: string;
   endDate?: string;
@@ -272,17 +265,18 @@ export interface ListPostsOptions {
   platform?: Platform;
 }
 
-export async function listPosts(opts: ListPostsOptions = {}): Promise<SocialPost[]> {
+export async function listPosts(opts: ListPostsOptions): Promise<SocialPost[]> {
+  const { clientId, ...filters } = opts;
   let start: string;
   let end: string;
 
-  if (opts.week) {
-    const range = getWeekDatesFromISO(opts.week);
+  if (filters.week) {
+    const range = getWeekDatesFromISO(filters.week);
     start = range.start;
     end = range.end;
-  } else if (opts.startDate && opts.endDate) {
-    start = opts.startDate;
-    end = opts.endDate;
+  } else if (filters.startDate && filters.endDate) {
+    start = filters.startDate;
+    end = filters.endDate;
   } else {
     // Default: current week
     const range = getWeekRange();
@@ -294,11 +288,11 @@ export async function listPosts(opts: ListPostsOptions = {}): Promise<SocialPost
   const posts: SocialPost[] = [];
 
   for (const date of dates) {
-    const dayPosts = await readDayPosts(date);
+    const dayPosts = await readDayPosts(clientId, date);
     for (const post of dayPosts) {
       if (post.deleted) continue;
-      if (opts.status && post.status !== opts.status) continue;
-      if (opts.platform && post.platform !== opts.platform) continue;
+      if (filters.status && post.status !== filters.status) continue;
+      if (filters.platform && post.platform !== filters.platform) continue;
       posts.push(post);
     }
   }
@@ -306,16 +300,20 @@ export async function listPosts(opts: ListPostsOptions = {}): Promise<SocialPost
   return posts.sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate));
 }
 
-export async function getPost(id: string): Promise<SocialPost | null> {
-  const index = await readPostIndex();
+export async function getPost(clientId: string, id: string): Promise<SocialPost | null> {
+  const index = await readPostIndex(clientId);
   const entry = index.posts.find((p) => p.id === id);
   if (!entry) return null;
 
-  const dayPosts = await readDayPosts(entry.ref.match(/posts-(\d{4}-\d{2}-\d{2})\.json/)?.[1] ?? '');
+  const dayPosts = await readDayPosts(
+    clientId,
+    entry.ref.match(/posts-(\d{4}-\d{2}-\d{2})\.json/)?.[1] ?? ''
+  );
   return dayPosts.find((p) => p.id === id) ?? null;
 }
 
 export interface CreatePostInput {
+  clientId: string;
   platform: Platform;
   content: string;
   pillar?: Pillar;
@@ -333,7 +331,7 @@ export async function createPost(input: CreatePostInput): Promise<SocialPost> {
 
   const post: SocialPost = {
     id,
-    clientId: CLIENT_ID,
+    clientId: input.clientId,
     platform: input.platform,
     content: input.content,
     pillar: input.pillar ?? null,
@@ -353,11 +351,11 @@ export async function createPost(input: CreatePostInput): Promise<SocialPost> {
     tags: input.tags,
   };
 
-  const existing = await readDayPosts(input.scheduledDate);
+  const existing = await readDayPosts(input.clientId, input.scheduledDate);
   existing.push(post);
-  await writeDayPosts(input.scheduledDate, existing);
-  await upsertPostInIndex(post);
-  await regeneratePostCurrent();
+  await writeDayPosts(input.clientId, input.scheduledDate, existing);
+  await upsertPostInIndex(input.clientId, post);
+  await regeneratePostCurrent(input.clientId);
 
   return post;
 }
@@ -370,8 +368,8 @@ export interface UpdatePostInput {
   tags?: string[];
 }
 
-export async function updatePost(id: string, input: UpdatePostInput): Promise<SocialPost> {
-  const post = await getPost(id);
+export async function updatePost(clientId: string, id: string, input: UpdatePostInput): Promise<SocialPost> {
+  const post = await getPost(clientId, id);
   if (!post) throw new Error('Post not found');
   if (post.status === 'approved' || post.status === 'posted') {
     throw new Error(`Cannot edit a post with status: ${post.status}`);
@@ -393,30 +391,31 @@ export async function updatePost(id: string, input: UpdatePostInput): Promise<So
 
   if (oldDate !== newDate) {
     // Remove from old day
-    const oldPosts = await readDayPosts(oldDate);
-    await writeDayPosts(oldDate, oldPosts.filter((p) => p.id !== id));
+    const oldPosts = await readDayPosts(clientId, oldDate);
+    await writeDayPosts(clientId, oldDate, oldPosts.filter((p) => p.id !== id));
     // Add to new day
-    const newPosts = await readDayPosts(newDate);
+    const newPosts = await readDayPosts(clientId, newDate);
     newPosts.push(post);
-    await writeDayPosts(newDate, newPosts);
+    await writeDayPosts(clientId, newDate, newPosts);
   } else {
-    const dayPosts = await readDayPosts(oldDate);
+    const dayPosts = await readDayPosts(clientId, oldDate);
     const idx = dayPosts.findIndex((p) => p.id === id);
     if (idx >= 0) dayPosts[idx] = post;
-    await writeDayPosts(oldDate, dayPosts);
+    await writeDayPosts(clientId, oldDate, dayPosts);
   }
 
-  await upsertPostInIndex(post);
-  await regeneratePostCurrent();
+  await upsertPostInIndex(clientId, post);
+  await regeneratePostCurrent(clientId);
   return post;
 }
 
 export async function transitionPostStatus(
+  clientId: string,
   id: string,
   newStatus: PostStatus,
   updatedBy = 'mike-1'
 ): Promise<SocialPost> {
-  const post = await getPost(id);
+  const post = await getPost(clientId, id);
   if (!post) throw new Error('Post not found');
 
   const allowed = STATUS_TRANSITIONS[post.status];
@@ -431,42 +430,44 @@ export async function transitionPostStatus(
   if (newStatus === 'approved') post.approvedAt = now;
   if (newStatus === 'posted') post.postedAt = now;
 
-  const dayPosts = await readDayPosts(post.scheduledDate);
+  const dayPosts = await readDayPosts(clientId, post.scheduledDate);
   const idx = dayPosts.findIndex((p) => p.id === id);
   if (idx >= 0) dayPosts[idx] = post;
-  await writeDayPosts(post.scheduledDate, dayPosts);
+  await writeDayPosts(clientId, post.scheduledDate, dayPosts);
 
-  await upsertPostInIndex(post);
-  await regeneratePostCurrent();
+  await upsertPostInIndex(clientId, post);
+  await regeneratePostCurrent(clientId);
   return post;
 }
 
-export async function softDeletePost(id: string): Promise<SocialPost> {
-  const post = await getPost(id);
+export async function softDeletePost(clientId: string, id: string): Promise<SocialPost> {
+  const post = await getPost(clientId, id);
   if (!post) throw new Error('Post not found');
 
   post.deleted = true;
   post.deletedAt = new Date().toISOString();
 
-  const dayPosts = await readDayPosts(post.scheduledDate);
+  const dayPosts = await readDayPosts(clientId, post.scheduledDate);
   const idx = dayPosts.findIndex((p) => p.id === id);
   if (idx >= 0) dayPosts[idx] = post;
-  await writeDayPosts(post.scheduledDate, dayPosts);
+  await writeDayPosts(clientId, post.scheduledDate, dayPosts);
 
-  await upsertPostInIndex(post);
-  await regeneratePostCurrent();
+  await upsertPostInIndex(clientId, post);
+  await regeneratePostCurrent(clientId);
   return post;
 }
 
-export async function getReminderData(today?: string): Promise<{
+export async function getReminderData(clientId: string, today?: string): Promise<{
+  clientId: string;
   today: string;
   approvedCount: number;
   posts: SocialPost[];
 }> {
   const todayStr = today ?? new Date().toISOString().split('T')[0];
-  const dayPosts = await readDayPosts(todayStr);
+  const dayPosts = await readDayPosts(clientId, todayStr);
   const approved = dayPosts.filter((p) => p.status === 'approved' && !p.deleted);
   return {
+    clientId,
     today: todayStr,
     approvedCount: approved.length,
     posts: approved,
@@ -477,10 +478,10 @@ export async function getReminderData(today?: string): Promise<{
 // OUTREACH — Service Layer
 // ─────────────────────────────────────────────────────────────────────────────
 
-export async function readOutreachIndex(): Promise<OutreachIndex> {
-  const data = await readJson<OutreachIndex>(getOutreachIndexPath());
+export async function readOutreachIndex(clientId: string): Promise<OutreachIndex> {
+  const data = await readJson<OutreachIndex>(getOutreachIndexPath(clientId));
   return data ?? {
-    clientId: CLIENT_ID,
+    clientId,
     totalDaysLogged: 0,
     targets: { accountsLikedPerDay: 25, commentsWrittenPerDay: 5, minCommentWordCount: 5 },
     lastUpdated: new Date().toISOString(),
@@ -488,8 +489,8 @@ export async function readOutreachIndex(): Promise<OutreachIndex> {
   };
 }
 
-async function upsertOutreachInIndex(outreach: DailyOutreach): Promise<void> {
-  const index = await readOutreachIndex();
+async function upsertOutreachInIndex(clientId: string, outreach: DailyOutreach): Promise<void> {
+  const index = await readOutreachIndex(clientId);
   const entry: OutreachIndexRecord = {
     date: outreach.date,
     completed: outreach.completed,
@@ -509,10 +510,10 @@ async function upsertOutreachInIndex(outreach: DailyOutreach): Promise<void> {
   index.lastUpdated = new Date().toISOString();
   // Sort records by date desc
   index.records.sort((a, b) => b.date.localeCompare(a.date));
-  await writeJson(getOutreachIndexPath(), index);
+  await writeJson(getOutreachIndexPath(clientId), index);
 }
 
-async function regenerateOutreachCurrent(today?: string): Promise<void> {
+async function regenerateOutreachCurrent(clientId: string, today?: string): Promise<void> {
   const todayStr = today ?? new Date().toISOString().split('T')[0];
   const { start, end } = getWeekRange(todayStr);
   const dates = getDatesInRange(start, end);
@@ -526,7 +527,7 @@ async function regenerateOutreachCurrent(today?: string): Promise<void> {
   const TARGETS = { likes: 25, comments: 5 };
 
   for (const date of dates) {
-    const data = await readJson<DailyOutreach>(getOutreachDayPath(date));
+    const data = await readJson<DailyOutreach>(getOutreachDayPath(clientId, date));
     if (!data) continue;
     weekDaysLogged++;
     weekLikes += data.likes.length;
@@ -536,10 +537,7 @@ async function regenerateOutreachCurrent(today?: string): Promise<void> {
   }
 
   // Streak: count consecutive completed days up to yesterday
-  const index = await readOutreachIndex();
-  const yesterday = new Date(todayStr + 'T00:00:00');
-  yesterday.setDate(yesterday.getDate() - 1);
-  let streak = 0;
+  const index = await readOutreachIndex(clientId);
   let bestStreak = 0;
   let currentStreak = 0;
   let lastCompletedDate: string | null = null;
@@ -554,10 +552,10 @@ async function regenerateOutreachCurrent(today?: string): Promise<void> {
       currentStreak = 0;
     }
   }
-  streak = currentStreak;
+  const streak = currentStreak;
 
   const current = {
-    clientId: CLIENT_ID,
+    clientId,
     generatedAt: new Date().toISOString(),
     today: todayStr,
     todaysProgress: {
@@ -586,21 +584,21 @@ async function regenerateOutreachCurrent(today?: string): Promise<void> {
     },
   };
 
-  await writeJson(getOutreachCurrentPath(), current);
+  await writeJson(getOutreachCurrentPath(clientId), current);
 }
 
-export async function getOutreachByDate(date: string): Promise<DailyOutreach | null> {
-  return readJson<DailyOutreach>(getOutreachDayPath(date));
+export async function getOutreachByDate(clientId: string, date: string): Promise<DailyOutreach | null> {
+  return readJson<DailyOutreach>(getOutreachDayPath(clientId, date));
 }
 
-export async function initOutreach(date: string): Promise<DailyOutreach> {
-  const existing = await getOutreachByDate(date);
+export async function initOutreach(clientId: string, date: string): Promise<DailyOutreach> {
+  const existing = await getOutreachByDate(clientId, date);
   if (existing) return existing;
 
   const now = new Date().toISOString();
   const outreach: DailyOutreach = {
     date,
-    clientId: CLIENT_ID,
+    clientId,
     likes: [],
     comments: [],
     completed: false,
@@ -608,15 +606,15 @@ export async function initOutreach(date: string): Promise<DailyOutreach> {
     updatedAt: now,
   };
 
-  await writeJson(getOutreachDayPath(date), outreach);
-  await upsertOutreachInIndex(outreach);
-  await regenerateOutreachCurrent(date);
+  await writeJson(getOutreachDayPath(clientId, date), outreach);
+  await upsertOutreachInIndex(clientId, outreach);
+  await regenerateOutreachCurrent(clientId, date);
   return outreach;
 }
 
-export async function addLike(date: string, like: Omit<OutreachLike, 'timestamp'>): Promise<DailyOutreach> {
-  let outreach = await getOutreachByDate(date);
-  if (!outreach) outreach = await initOutreach(date);
+export async function addLike(clientId: string, date: string, like: Omit<OutreachLike, 'timestamp'>): Promise<DailyOutreach> {
+  let outreach = await getOutreachByDate(clientId, date);
+  if (!outreach) outreach = await initOutreach(clientId, date);
 
   const entry: OutreachLike = {
     ...like,
@@ -629,18 +627,19 @@ export async function addLike(date: string, like: Omit<OutreachLike, 'timestamp'
   outreach.completed =
     outreach.likes.length >= TARGETS.likes && outreach.comments.length >= TARGETS.comments;
 
-  await writeJson(getOutreachDayPath(date), outreach);
-  await upsertOutreachInIndex(outreach);
-  await regenerateOutreachCurrent(date);
+  await writeJson(getOutreachDayPath(clientId, date), outreach);
+  await upsertOutreachInIndex(clientId, outreach);
+  await regenerateOutreachCurrent(clientId, date);
   return outreach;
 }
 
 export async function addComment(
+  clientId: string,
   date: string,
   comment: Omit<OutreachComment, 'timestamp' | 'wordCount'>
 ): Promise<DailyOutreach> {
-  let outreach = await getOutreachByDate(date);
-  if (!outreach) outreach = await initOutreach(date);
+  let outreach = await getOutreachByDate(clientId, date);
+  if (!outreach) outreach = await initOutreach(clientId, date);
 
   const wordCount = comment.text.trim().split(/\s+/).length;
   if (wordCount < 5) {
@@ -659,31 +658,32 @@ export async function addComment(
   outreach.completed =
     outreach.likes.length >= TARGETS.likes && outreach.comments.length >= TARGETS.comments;
 
-  await writeJson(getOutreachDayPath(date), outreach);
-  await upsertOutreachInIndex(outreach);
-  await regenerateOutreachCurrent(date);
+  await writeJson(getOutreachDayPath(clientId, date), outreach);
+  await upsertOutreachInIndex(clientId, outreach);
+  await regenerateOutreachCurrent(clientId, date);
   return outreach;
 }
 
 export async function updateOutreach(
+  clientId: string,
   date: string,
   patch: { notes?: string; completed?: boolean }
 ): Promise<DailyOutreach> {
-  let outreach = await getOutreachByDate(date);
+  let outreach = await getOutreachByDate(clientId, date);
   if (!outreach) throw new Error(`Outreach log for ${date} not found`);
 
   if (patch.notes !== undefined) outreach.notes = patch.notes;
   if (patch.completed !== undefined) outreach.completed = patch.completed;
   outreach.updatedAt = new Date().toISOString();
 
-  await writeJson(getOutreachDayPath(date), outreach);
-  await upsertOutreachInIndex(outreach);
-  await regenerateOutreachCurrent(date);
+  await writeJson(getOutreachDayPath(clientId, date), outreach);
+  await upsertOutreachInIndex(clientId, outreach);
+  await regenerateOutreachCurrent(clientId, date);
   return outreach;
 }
 
-export async function listOutreach(opts: { startDate?: string; endDate?: string } = {}): Promise<DailyOutreach[]> {
-  const index = await readOutreachIndex();
+export async function listOutreach(clientId: string, opts: { startDate?: string; endDate?: string } = {}): Promise<DailyOutreach[]> {
+  const index = await readOutreachIndex(clientId);
   let records = index.records;
 
   if (opts.startDate) records = records.filter((r) => r.date >= opts.startDate!);
@@ -691,13 +691,13 @@ export async function listOutreach(opts: { startDate?: string; endDate?: string 
 
   const results: DailyOutreach[] = [];
   for (const r of records) {
-    const data = await getOutreachByDate(r.date);
+    const data = await getOutreachByDate(clientId, r.date);
     if (data) results.push(data);
   }
 
   return results.sort((a, b) => b.date.localeCompare(a.date));
 }
 
-export async function getOutreachCurrentData() {
-  return readJson(getOutreachCurrentPath());
+export async function getOutreachCurrentData(clientId: string) {
+  return readJson(getOutreachCurrentPath(clientId));
 }
