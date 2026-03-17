@@ -5,7 +5,7 @@
  * SC-CLIENT-003
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { getClient, updateClient } from '@/lib/social/clientService';
+import { getClient, updateClient, updateClientSettings, getClientSettings } from '@/lib/social/clientService';
 
 type Params = { params: Promise<{ clientId: string }> };
 
@@ -44,7 +44,7 @@ export async function PUT(
       return errorResponse('VALIDATION_ERROR', 'Request body is required', 400);
     }
 
-    const { name, contactEmail, contactPhone, industry, branding } = body;
+    const { name, contactEmail, contactPhone, industry, branding, platforms, outreachTargets } = body;
 
     // Validate name if provided
     if (name !== undefined) {
@@ -71,7 +71,23 @@ export async function PUT(
         industry,
         branding,
       });
-      return NextResponse.json(updated);
+
+      // Update settings if platforms/outreachTargets provided
+      if (platforms !== undefined || outreachTargets !== undefined) {
+        await updateClientSettings(clientId, {
+          ...(platforms !== undefined ? { platforms } : {}),
+          ...(outreachTargets !== undefined ? { outreachTargets } : {}),
+        });
+      }
+
+      const settings = await getClientSettings(clientId);
+      const enriched = {
+        ...updated,
+        platforms: settings?.platforms ?? [],
+        outreachTargets: settings?.outreachTargets ?? { likes: 25, comments: 5 },
+      };
+
+      return NextResponse.json(enriched);
     } catch (err: unknown) {
       if (err instanceof Error && err.message.startsWith('CLIENT_NOT_FOUND')) {
         return errorResponse('NOT_FOUND', `Client '${clientId}' not found`, 404);

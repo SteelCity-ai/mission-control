@@ -35,7 +35,11 @@ function getISOWeek(d: Date): string {
   return `${d.getFullYear()}-W${String(week).padStart(2, "0")}`;
 }
 
-export function CalendarTab() {
+interface CalendarTabProps {
+  clientId: string;
+}
+
+export function CalendarTab({ clientId }: CalendarTabProps) {
   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +62,7 @@ export function CalendarTab() {
     setLoading(true);
     const startStr = toISODate(weekStart);
     const endStr = toISODate(weekEnd);
-    fetch(`/api/social/posts?startDate=${startStr}&endDate=${endStr}`)
+    fetch(`/api/social/posts?clientId=${clientId}&startDate=${startStr}&endDate=${endStr}`)
       .then((r) => r.json())
       .then((data) => setPosts(data.posts ?? []))
       .catch(() => setPosts([]))

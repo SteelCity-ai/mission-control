@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   listClients,
   createClient,
+  updateClientSettings,
+  getClientSettings,
   generateUniqueSlug,
   isValidSlug,
   readIndex,
@@ -33,9 +35,25 @@ export async function GET(req: NextRequest) {
     const clients = await listClients(statusParam as 'active' | 'archived' | 'all');
     const index = await readIndex();
 
+    // Enrich each client with settings (platforms, outreachTargets)
+    const enriched = await Promise.all(
+      clients.map(async (c) => {
+        try {
+          const settings = await getClientSettings(c.id);
+          return {
+            ...c,
+            platforms: settings?.platforms ?? [],
+            outreachTargets: settings?.outreachTargets ?? { likes: 25, comments: 5 },
+          };
+        } catch {
+          return { ...c, platforms: [], outreachTargets: { likes: 25, comments: 5 } };
+        }
+      })
+    );
+
     return NextResponse.json({
-      clients,
-      count: clients.length,
+      clients: enriched,
+      count: enriched.length,
       totalClients: index.totalClients,
       activeClients: index.activeClients,
       archivedClients: index.archivedClients,
@@ -54,7 +72,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('VALIDATION_ERROR', 'Request body is required', 400);
     }
 
-    const { name, slug, contactEmail, contactPhone, industry, branding } = body;
+    const { name, slug, contactEmail, contactPhone, industry, branding, platforms, outreachTargets } = body;
 
     // Validate required fields
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
@@ -93,7 +111,21 @@ export async function POST(req: NextRequest) {
         branding,
       });
 
-      return NextResponse.json(client, { status: 201 });
+      // Update settings with platforms and outreachTargets if provided
+      if (platforms !== undefined || outreachTargets !== undefined) {
+        await updateClientSettings(client.id, {
+          ...(platforms !== undefined ? { platforms } : {}),
+          ...(outreachTargets !== undefined ? { outreachTargets } : {}),
+        });
+      }
+
+      const enrichedClient = {
+        ...client,
+        platforms: platforms ?? ['facebook', 'instagram'],
+        outreachTargets: outreachTargets ?? { likes: 25, comments: 5 },
+      };
+
+      return NextResponse.json(enrichedClient, { status: 201 });
     } catch (err: unknown) {
       if (err instanceof Error && err.message.startsWith('SLUG_CONFLICT:')) {
         const parts = err.message.split(':');

@@ -16,6 +16,7 @@ import {
   Settings,
   History,
   CalendarDays,
+  Users,
 } from "lucide-react";
 
 const dockItems = [
@@ -25,6 +26,7 @@ const dockItems = [
   { href: "/memory", label: "Memory", icon: Brain },
   { href: "/agents", label: "Agents", icon: Bot },
   { href: "/office", label: "Office", icon: Building2 },
+  { href: "/clients", label: "Clients", icon: Users },
   { href: "/social", label: "Social", icon: CalendarDays },
   { href: "/activity", label: "Activity", icon: Activity },
   { href: "/cron", label: "Cron Jobs", icon: Clock },
