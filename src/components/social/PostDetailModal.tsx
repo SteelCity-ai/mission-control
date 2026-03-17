@@ -42,7 +42,7 @@ export function PostDetailModal({ post, onClose, onUpdate, onDelete }: Props) {
       const res = await fetch(`/api/social/posts/${post.id}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: targetStatus }),
+        body: JSON.stringify({ clientId: post.clientId, status: targetStatus }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -64,7 +64,7 @@ export function PostDetailModal({ post, onClose, onUpdate, onDelete }: Props) {
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/social/posts/${post.id}`, {
+      const res = await fetch(`/api/social/posts/${post.id}?clientId=${post.clientId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete post");

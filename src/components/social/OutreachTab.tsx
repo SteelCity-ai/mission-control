@@ -139,6 +139,7 @@ export function OutreachTab({ clientId }: OutreachTabProps) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          clientId,
           action: "add_like",
           account: entry.account.trim(),
           url: entry.url.trim() || undefined,
@@ -190,6 +191,7 @@ export function OutreachTab({ clientId }: OutreachTabProps) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          clientId,
           action: "add_comment",
           account: entry.account.trim(),
           text: entry.text.trim(),

@@ -95,7 +95,7 @@ export function NewPostDrawer({ open, onClose, onCreated, clientId }: Props) {
           const statusRes = await fetch(`/api/social/posts/${post.id}/status`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status }),
+            body: JSON.stringify({ clientId, status }),
           });
           if (statusRes.ok) {
             post = await statusRes.json();
