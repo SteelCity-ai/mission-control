@@ -28,7 +28,7 @@ import {
 
 // ── Base paths ──────────────────────────────────────────────────────────────
 
-const CLIENTS_DATA_BASE = '/data/mission-control-data/clients';
+const CLIENTS_DATA_BASE = path.join(process.env.MISSION_CONTROL_DATA_DIR || '/data/mission-control-data', 'clients');
 
 /** Get data base dir for a given clientId */
 function getDataBase(clientId: string): string {

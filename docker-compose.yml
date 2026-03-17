@@ -14,6 +14,7 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - AUTH_SECRET=${AUTH_SECRET}
       - OPENCLAW_GATEWAY_URL=http://host.docker.internal:18789
+      - MISSION_CONTROL_DATA_DIR=/app/data
     volumes:
       # Mount OpenClaw directory for read access
       - /docker/openclaw-cnvy/data/.openclaw:/openclaw:ro

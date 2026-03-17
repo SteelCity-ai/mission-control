@@ -72,7 +72,7 @@ export interface ClientSettings {
 
 // ── Paths ────────────────────────────────────────────────────────────────────
 
-const CLIENTS_BASE = '/data/mission-control-data/clients';
+const CLIENTS_BASE = path.join(process.env.MISSION_CONTROL_DATA_DIR || '/data/mission-control-data', 'clients');
 const INDEX_PATH = path.join(CLIENTS_BASE, 'clients-index.json');
 
 function clientDir(clientId: string): string {
