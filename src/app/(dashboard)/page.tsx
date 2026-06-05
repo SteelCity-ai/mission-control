@@ -7,6 +7,7 @@ import { WeatherWidget } from "@/components/WeatherWidget";
 import { Notepad } from "@/components/Notepad";
 import { CommandBar } from "@/components/CommandBar";
 import { ActiveWorkflows } from "@/components/ActiveWorkflows";
+import { AttentionQueue } from "@/components/AttentionQueue";
 import {
   Activity,
   CheckCircle,
@@ -170,6 +171,28 @@ export default function DashboardPage() {
         <div className="lg:col-span-1">
           <WeatherWidget />
         </div>
+      </div>
+
+      {/* Attention Queue */}
+      <div
+        className="mb-4 rounded-xl overflow-hidden"
+        style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}
+      >
+        <div
+          className="px-5 py-3 flex items-center justify-between"
+          style={{ borderBottom: "1px solid var(--border)" }}
+        >
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4" style={{ color: "var(--warning)" }} />
+            <h2
+              className="text-sm font-semibold"
+              style={{ fontFamily: "var(--font-heading)", color: "var(--text-primary)" }}
+            >
+              Attention Queue
+            </h2>
+          </div>
+        </div>
+        <AttentionQueue limit={4} />
       </div>
 
       {/* Command + Active Dispatches row */}
