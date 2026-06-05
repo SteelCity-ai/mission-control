@@ -1,0 +1,66 @@
+{
+  "id": "seo-audit",
+  "name": "SEO Audit & Fix Plan",
+  "description": "Full SEO audit with prioritized fixes and a 90-day improvement roadmap",
+  "icon": "🔍",
+  "category": "marketing",
+  "parameters": [
+    {
+      "key": "business_name",
+      "label": "Business Name",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. Absolute Pest Services"
+    },
+    {
+      "key": "website_url",
+      "label": "Website URL",
+      "type": "text",
+      "required": true,
+      "placeholder": "https://example.com"
+    },
+    {
+      "key": "industry",
+      "label": "Industry",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. pest control, roofing"
+    },
+    {
+      "key": "target_location",
+      "label": "Target Location(s)",
+      "type": "text",
+      "required": false,
+      "placeholder": "e.g. Pittsburgh PA, Western PA"
+    },
+    {
+      "key": "main_competitors",
+      "label": "Known Competitors (optional)",
+      "type": "text",
+      "required": false,
+      "placeholder": "e.g. competitor1.com, competitor2.com"
+    }
+  ],
+  "steps": [
+    {
+      "agent": "research",
+      "task": "Conduct a comprehensive SEO audit for {{business_name}} at {{website_url}}. Industry: {{industry}}, Location: {{target_location}}. Analyze: current keyword rankings, on-page SEO (titles, meta, headers, content), technical SEO (speed, mobile, crawlability, schema), local SEO (GMB, citations, reviews), backlink profile, and competitor comparison vs {{main_competitors}}. Identify the top 10 highest-impact issues."
+    },
+    {
+      "agent": "growth",
+      "task": "Based on the SEO audit for {{business_name}}, build the keyword strategy. Research: primary keywords, long-tail opportunities, local intent keywords for {{target_location}}, content gap analysis vs {{main_competitors}}, and search volume/difficulty estimates. Produce a target keyword list with priority tiers."
+    },
+    {
+      "agent": "build",
+      "task": "Create the technical SEO fix checklist for {{website_url}}. For each issue identified in the audit: provide the exact fix, the file/page to edit, estimated difficulty (easy/medium/hard), and expected impact. Include: meta tag templates for all pages, schema markup code for {{industry}}, and structured data recommendations."
+    },
+    {
+      "agent": "design",
+      "task": "Review {{website_url}} for UX/conversion issues that affect SEO signals. Analyze: page structure, internal linking, CTA placement, content readability, above-the-fold content, and user trust signals. Propose specific copy and layout improvements for the top 5 pages."
+    },
+    {
+      "agent": "reporter",
+      "task": "Compile the full SEO audit report and 90-day roadmap for {{business_name}}. Include: executive summary, current baseline metrics, prioritized fix list (quick wins, medium-term, long-term), monthly milestone targets, and success metrics to track. Format as a client-deliverable report."
+    }
+  ]
+}

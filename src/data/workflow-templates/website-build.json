@@ -1,0 +1,77 @@
+{
+  "id": "website-build",
+  "name": "Website / Web App Build",
+  "description": "Full build cycle from discovery to launch for a client website or web application",
+  "icon": "🌐",
+  "category": "development",
+  "parameters": [
+    {
+      "key": "project_name",
+      "label": "Project Name",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. Revive Roofing Admin Portal"
+    },
+    {
+      "key": "client_name",
+      "label": "Client Name",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. Revive Roofing"
+    },
+    {
+      "key": "project_type",
+      "label": "Project Type",
+      "type": "select",
+      "options": ["marketing website", "admin portal", "client portal", "e-commerce", "web app", "landing page"],
+      "required": true
+    },
+    {
+      "key": "tech_stack",
+      "label": "Tech Stack",
+      "type": "text",
+      "required": false,
+      "placeholder": "e.g. Next.js, Tailwind, Supabase"
+    },
+    {
+      "key": "current_status",
+      "label": "Current Status / What exists",
+      "type": "text",
+      "required": false,
+      "placeholder": "e.g. existing Express site to migrate, starting fresh, has design mockups"
+    },
+    {
+      "key": "key_features",
+      "label": "Key Features Required",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. job management, estimate builder, client portal, payments"
+    }
+  ],
+  "steps": [
+    {
+      "agent": "research",
+      "task": "Research and discovery for {{project_name}} ({{project_type}}) for {{client_name}}. Review: {{current_status}}. Investigate: comparable tools/sites in the industry, best practices for {{project_type}}, UX patterns, integration options, and any existing codebase or design assets. Key features needed: {{key_features}}."
+    },
+    {
+      "agent": "architect",
+      "task": "Design the full technical architecture for {{project_name}}. Stack: {{tech_stack}}. Type: {{project_type}}. Features: {{key_features}}. Produce: component tree, data model, API route plan, auth strategy, deployment approach, and a phased build plan with milestones. Flag any risks or constraints from current state: {{current_status}}."
+    },
+    {
+      "agent": "design",
+      "task": "Create the UX/UI design plan for {{project_name}} ({{project_type}}) for {{client_name}}. Define: page structure, navigation flow, key screen wireframes, component library, color/typography system, and responsive behavior. Prioritize the user flows for: {{key_features}}."
+    },
+    {
+      "agent": "build",
+      "task": "Begin implementation of {{project_name}} using {{tech_stack}}. Follow the architecture plan. Build the core scaffolding, routing, auth, and the highest-priority features: {{key_features}}. Document what was built, what's next, and any blockers. Current state context: {{current_status}}."
+    },
+    {
+      "agent": "qa",
+      "task": "QA review of {{project_name}} build progress. Test: {{key_features}}. Check for: broken flows, missing error handling, mobile responsiveness, accessibility issues, and security concerns. Provide a prioritized bug report and pass/fail status for each feature."
+    },
+    {
+      "agent": "reporter",
+      "task": "Generate a build status report for {{project_name}} for client {{client_name}}. Summarize: what's been built, what's in progress, what's remaining, current blockers, estimated completion, and recommended next sprint priorities."
+    }
+  ]
+}
