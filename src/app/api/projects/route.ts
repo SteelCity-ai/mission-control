@@ -11,6 +11,8 @@ export const dynamic = 'force-dynamic';
 interface Project {
   id: string;
   name: string;
+  clientId: string | null;
+  description?: string;
   status: string;
   progress: number;
   milestones: Array<{ id: string; name: string; completed: boolean }>;
@@ -21,6 +23,8 @@ interface Project {
     blocked: number;
   };
   departments: Record<string, number>;
+  recentWork?: string[];
+  blockers?: string[];
   startDate: string;
   targetDate: string;
 }

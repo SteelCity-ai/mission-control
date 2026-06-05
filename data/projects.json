@@ -2,6 +2,8 @@
   {
     "id": "steel-mission-control",
     "name": "Mission Control Dashboard",
+    "clientId": null,
+    "description": "Internal command center for managing the OpenClaw agent team, client projects, and operations.",
     "status": "active",
     "progress": 65,
     "milestones": [
@@ -26,12 +28,23 @@
       "Growth": 1,
       "Reporting": 1
     },
+    "recentWork": [
+      "Added multi-client social media management module",
+      "Fixed SSE agent stream with polling fallback",
+      "Built department Kanban board with priority filtering"
+    ],
+    "blockers": [
+      "Real-time activity stream needs OpenClaw webhook integration",
+      "Agent memory system requires VPS database setup"
+    ],
     "startDate": "2026-03-01",
     "targetDate": "2026-04-15"
   },
   {
     "id": "steel-voice-pipeline",
     "name": "Voice Pipeline Integration",
+    "clientId": null,
+    "description": "Voice-to-text and text-to-speech pipeline for agent interactions.",
     "status": "planning",
     "progress": 20,
     "milestones": [
@@ -54,12 +67,19 @@
       "Growth": 0,
       "Reporting": 0
     },
+    "recentWork": [
+      "Researched ElevenLabs, Deepgram, Whisper APIs",
+      "Drafted initial API spec"
+    ],
+    "blockers": [],
     "startDate": "2026-03-10",
     "targetDate": "2026-04-30"
   },
   {
     "id": "steel-agent-memory",
     "name": "Agent Memory System",
+    "clientId": null,
+    "description": "Long-term memory and context injection system for OpenClaw agents.",
     "status": "active",
     "progress": 45,
     "milestones": [
@@ -82,7 +102,206 @@
       "Growth": 0,
       "Reporting": 0
     },
+    "recentWork": [
+      "Designed memory schema with vector embeddings",
+      "Implemented SQLite-based long-term storage"
+    ],
+    "blockers": [
+      "Context injection timing conflicts with active agent sessions"
+    ],
     "startDate": "2026-02-15",
     "targetDate": "2026-03-30"
+  },
+  {
+    "id": "revive-roofing-admin",
+    "name": "Revive Roofing Admin Portal",
+    "clientId": "revive",
+    "description": "Admin portal for Revive Roofing — job management, estimates, and client tracking.",
+    "status": "active",
+    "progress": 72,
+    "milestones": [
+      { "id": "m1", "name": "Admin Auth & Roles", "completed": true },
+      { "id": "m2", "name": "Job Dashboard", "completed": true },
+      { "id": "m3", "name": "Estimate Builder", "completed": true },
+      { "id": "m4", "name": "Client Portal", "completed": false },
+      { "id": "m5", "name": "Payment Integration", "completed": false }
+    ],
+    "tasksCount": {
+      "total": 18,
+      "completed": 13,
+      "inProgress": 3,
+      "blocked": 2
+    },
+    "departments": {
+      "Research": 1,
+      "Architecture": 2,
+      "Build": 6,
+      "Design": 3,
+      "QA": 3,
+      "Growth": 1,
+      "Reporting": 2
+    },
+    "recentWork": [
+      "Completed estimate builder with line-item support",
+      "Added job status pipeline (Lead → Active → Complete → Invoiced)",
+      "Integrated Google Maps for job location tracking"
+    ],
+    "blockers": [
+      "Payment gateway pending Stripe account approval",
+      "Client portal waiting on final UX sign-off from Revive team"
+    ],
+    "startDate": "2026-01-10",
+    "targetDate": "2026-04-01"
+  },
+  {
+    "id": "revive-architectural-drawing",
+    "name": "Revive Architectural Drawing Tool",
+    "clientId": "revive",
+    "description": "In-browser roof drawing and measurement tool with material estimation.",
+    "status": "active",
+    "progress": 38,
+    "milestones": [
+      { "id": "m1", "name": "Canvas Drawing Engine", "completed": true },
+      { "id": "m2", "name": "Measurement Tools", "completed": false },
+      { "id": "m3", "name": "Material Calculator", "completed": false },
+      { "id": "m4", "name": "PDF Export", "completed": false }
+    ],
+    "tasksCount": {
+      "total": 12,
+      "completed": 4,
+      "inProgress": 4,
+      "blocked": 1
+    },
+    "departments": {
+      "Research": 1,
+      "Architecture": 2,
+      "Build": 5,
+      "Design": 2,
+      "QA": 2,
+      "Growth": 0,
+      "Reporting": 0
+    },
+    "recentWork": [
+      "Built canvas drawing engine with polygon support",
+      "Added snap-to-grid and measurement overlay"
+    ],
+    "blockers": [
+      "PDF generation library has sizing issues with complex roof shapes"
+    ],
+    "startDate": "2026-02-01",
+    "targetDate": "2026-05-15"
+  },
+  {
+    "id": "revive-statecollege",
+    "name": "Revive State College Expansion",
+    "clientId": "revive",
+    "description": "Market expansion project for Revive Roofing entering the State College, PA area.",
+    "status": "planning",
+    "progress": 15,
+    "milestones": [
+      { "id": "m1", "name": "Market Research", "completed": true },
+      { "id": "m2", "name": "Landing Page", "completed": false },
+      { "id": "m3", "name": "Local SEO Setup", "completed": false },
+      { "id": "m4", "name": "Lead Gen Campaign", "completed": false }
+    ],
+    "tasksCount": {
+      "total": 8,
+      "completed": 1,
+      "inProgress": 2,
+      "blocked": 0
+    },
+    "departments": {
+      "Research": 2,
+      "Architecture": 1,
+      "Build": 2,
+      "Design": 1,
+      "QA": 0,
+      "Growth": 2,
+      "Reporting": 0
+    },
+    "recentWork": [
+      "Completed competitor analysis for State College market",
+      "Drafted landing page copy"
+    ],
+    "blockers": [],
+    "startDate": "2026-03-15",
+    "targetDate": "2026-06-01"
+  },
+  {
+    "id": "absolute-pest-services",
+    "name": "Absolute Pest Services Website",
+    "clientId": "absolute-pest-services",
+    "description": "Production Next.js website for Absolute Pest Services (repo: mmitch2958/absolute-pest-services-nextjs). WARNING: Old Express repo (SteelCity-ai/AbsolutePestServices.com) is LEGACY — do not confuse with production.",
+    "status": "active",
+    "progress": 85,
+    "milestones": [
+      { "id": "m1", "name": "Next.js Migration (from Express)", "completed": true },
+      { "id": "m2", "name": "Service Pages", "completed": true },
+      { "id": "m3", "name": "Contact & Quote Form", "completed": true },
+      { "id": "m4", "name": "SEO Optimization", "completed": true },
+      { "id": "m5", "name": "Blog / Content System", "completed": false }
+    ],
+    "tasksCount": {
+      "total": 16,
+      "completed": 14,
+      "inProgress": 1,
+      "blocked": 1
+    },
+    "departments": {
+      "Research": 1,
+      "Architecture": 1,
+      "Build": 5,
+      "Design": 3,
+      "QA": 3,
+      "Growth": 2,
+      "Reporting": 1
+    },
+    "recentWork": [
+      "Completed SEO meta tags and structured data",
+      "Deployed to production on Vercel",
+      "Added Google Analytics and Search Console integration"
+    ],
+    "blockers": [
+      "Blog CMS selection pending — choosing between Sanity, Contentful, or MDX"
+    ],
+    "startDate": "2025-11-01",
+    "targetDate": "2026-04-30"
+  },
+  {
+    "id": "steelcity-ai-website",
+    "name": "SteelCity-AI.com",
+    "clientId": null,
+    "description": "Company website for Steel City AI, LLC — portfolio, services, and contact.",
+    "status": "active",
+    "progress": 55,
+    "milestones": [
+      { "id": "m1", "name": "Design System", "completed": true },
+      { "id": "m2", "name": "Home & About Pages", "completed": true },
+      { "id": "m3", "name": "Services Section", "completed": false },
+      { "id": "m4", "name": "Case Studies", "completed": false },
+      { "id": "m5", "name": "Blog Launch", "completed": false }
+    ],
+    "tasksCount": {
+      "total": 10,
+      "completed": 5,
+      "inProgress": 3,
+      "blocked": 0
+    },
+    "departments": {
+      "Research": 1,
+      "Architecture": 1,
+      "Build": 3,
+      "Design": 3,
+      "QA": 1,
+      "Growth": 1,
+      "Reporting": 0
+    },
+    "recentWork": [
+      "Launched new design system with Pittsburgh steel aesthetic",
+      "Completed home and about pages"
+    ],
+    "blockers": [],
+    "startDate": "2026-01-15",
+    "targetDate": "2026-05-01"
   }
 ]

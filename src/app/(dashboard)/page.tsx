@@ -25,6 +25,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BRANDING, getAgentDisplayName } from "@/config/branding";
 
 interface Stats {
@@ -83,6 +84,7 @@ interface ProjectSummary {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<Stats>({ total: 0, today: 0, success: 0, error: 0, byType: {} });
   const [agents, setAgents] = useState<Agent[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -208,7 +210,9 @@ export default function DashboardPage() {
                 style={{
                   backgroundColor: 'var(--card-elevated)',
                   border: '1px solid var(--border)',
+                  cursor: 'pointer',
                 }}
+                onClick={() => router.push(`/projects/${project.id}`)}
                 onMouseEnter={e => {
                   (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)';
                   (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
