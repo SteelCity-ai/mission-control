@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { ProjectTaskBoard } from "@/components/ProjectTaskBoard";
 import {
   ArrowLeft,
   CheckCircle,
@@ -13,6 +14,7 @@ import {
   ChevronRight,
   Target,
   Users,
+  ListTodo,
   Calendar,
   BookOpen,
 } from "lucide-react";
@@ -564,6 +566,28 @@ export default function ProjectDetailPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Per-project task board */}
+      <div
+        className="mt-4 rounded-xl overflow-hidden"
+        style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}
+      >
+        <div className="px-5 py-3.5 flex items-center gap-2" style={{ borderBottom: "1px solid var(--border)" }}>
+          <ListTodo className="w-4 h-4" style={{ color: "var(--accent)" }} />
+          <h2
+            className="text-sm font-semibold"
+            style={{ fontFamily: "var(--font-heading)", color: "var(--text-primary)" }}
+          >
+            Project Tasks
+          </h2>
+          <span className="text-xs ml-1" style={{ color: "var(--text-muted)" }}>
+            — add, track, and dispatch work items
+          </span>
+        </div>
+        <div className="p-4">
+          <ProjectTaskBoard projectId={project.id} projectName={project.name} />
         </div>
       </div>
 
