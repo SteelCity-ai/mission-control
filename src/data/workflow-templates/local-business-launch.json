@@ -1,0 +1,77 @@
+{
+  "id": "local-business-launch",
+  "name": "Local Business Digital Launch",
+  "description": "Complete digital presence setup for a new or existing local business — website, GMB, social, SEO, and lead gen",
+  "icon": "🚀",
+  "category": "marketing",
+  "parameters": [
+    {
+      "key": "business_name",
+      "label": "Business Name",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. Revive Roofing"
+    },
+    {
+      "key": "industry",
+      "label": "Industry",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. roofing, pest control, landscaping"
+    },
+    {
+      "key": "location",
+      "label": "Service Area",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. Pittsburgh, PA and surrounding areas"
+    },
+    {
+      "key": "services",
+      "label": "Main Services Offered",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. roof repairs, new roofs, gutter installation"
+    },
+    {
+      "key": "existing_assets",
+      "label": "Existing Assets",
+      "type": "text",
+      "required": false,
+      "placeholder": "e.g. has logo, has website, has Facebook page, starting from scratch"
+    },
+    {
+      "key": "budget",
+      "label": "Monthly Marketing Budget",
+      "type": "select",
+      "options": ["under $250", "$250-$500", "$500-$1000", "$1000-$2500", "$2500+"],
+      "required": false
+    }
+  ],
+  "steps": [
+    {
+      "agent": "research",
+      "task": "Research the local market for {{business_name}} ({{industry}}) serving {{location}}. Identify: top local competitors, what they do well/poorly online, customer review patterns, pricing signals, dominant platforms, and the most effective lead gen channels for {{industry}} in this area. Existing assets: {{existing_assets}}."
+    },
+    {
+      "agent": "architect",
+      "task": "Design the complete digital presence strategy for {{business_name}}. Services: {{services}}. Area: {{location}}. Budget: {{budget}}. Create: website sitemap and page structure, GMB optimization checklist, social media platform selection and setup guide, review generation strategy, and the customer acquisition funnel from awareness to booked job."
+    },
+    {
+      "agent": "design",
+      "task": "Create the brand and content foundation for {{business_name}} ({{industry}}). Produce: brand voice guide, visual style recommendations, website copy for home page and key service pages ({{services}}), Google Business Profile description, social media bio copy, and 5 content pillars with sample posts. Tone should match {{industry}} in {{location}}."
+    },
+    {
+      "agent": "build",
+      "task": "Build the digital launch checklist for {{business_name}}. Create a step-by-step setup guide for: website deployment (with recommended tech stack given {{existing_assets}}), Google Business Profile setup/optimization, Facebook/Instagram business profiles, Nextdoor business account, review request templates (email + text), and contact form/lead capture setup. Make it so an admin with no tech background can follow it."
+    },
+    {
+      "agent": "growth",
+      "task": "Create the first 90-day growth plan for {{business_name}}. Budget: {{budget}}. Include: week-by-week action items, organic content schedule, paid ad strategy (Google Local Services or Facebook if budget allows), referral program idea, local partnership outreach targets, and review generation campaign. Prioritize highest-ROI actions for a {{industry}} business in {{location}}."
+    },
+    {
+      "agent": "reporter",
+      "task": "Compile the Digital Launch Package report for {{business_name}}. Format as a client-ready deliverable covering: what we're launching, why each piece matters, the 90-day roadmap, expected outcomes at 30/60/90 days, and a monthly reporting dashboard they can use to track progress (leads, calls, reviews, rankings)."
+    }
+  ]
+}

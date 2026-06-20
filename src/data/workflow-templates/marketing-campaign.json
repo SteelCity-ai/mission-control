@@ -1,0 +1,77 @@
+{
+  "id": "marketing-campaign",
+  "name": "Full Marketing Campaign",
+  "description": "End-to-end marketing campaign for a small business — strategy, content, distribution, and reporting",
+  "icon": "📣",
+  "category": "marketing",
+  "parameters": [
+    {
+      "key": "business_name",
+      "label": "Business Name",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. Absolute Pest Services"
+    },
+    {
+      "key": "industry",
+      "label": "Industry / Niche",
+      "type": "text",
+      "required": true,
+      "placeholder": "e.g. pest control, roofing, HVAC"
+    },
+    {
+      "key": "goal",
+      "label": "Campaign Goal",
+      "type": "select",
+      "options": ["lead generation", "brand awareness", "seasonal promotion", "product launch", "customer retention"],
+      "required": true
+    },
+    {
+      "key": "target_area",
+      "label": "Target Area / Market",
+      "type": "text",
+      "required": false,
+      "placeholder": "e.g. Pittsburgh metro, State College PA"
+    },
+    {
+      "key": "budget",
+      "label": "Monthly Budget (approx)",
+      "type": "text",
+      "required": false,
+      "placeholder": "e.g. $500/mo, low budget, none"
+    },
+    {
+      "key": "platforms",
+      "label": "Target Platforms",
+      "type": "text",
+      "required": false,
+      "placeholder": "e.g. Facebook, Google, Nextdoor, Instagram"
+    }
+  ],
+  "steps": [
+    {
+      "agent": "research",
+      "task": "Research the competitive landscape and target audience for {{business_name}} ({{industry}}) in {{target_area}}. Goal: {{goal}}. Find: top local competitors, customer pain points, seasonal patterns, effective messaging angles, and platform-specific best practices. Budget context: {{budget}}."
+    },
+    {
+      "agent": "architect",
+      "task": "Design the full marketing campaign strategy for {{business_name}}. Based on research, define: campaign positioning, core messaging, content pillars, platform mix ({{platforms}}), posting cadence, call-to-action strategy, and 30-60-90 day milestones. Goal: {{goal}}. Budget: {{budget}}."
+    },
+    {
+      "agent": "design",
+      "task": "Create content briefs and visual direction for the {{business_name}} marketing campaign. Define: brand voice, visual style guide, post templates for {{platforms}}, headline formulas, and image/video concepts for each content pillar. Provide 10 ready-to-use post ideas with captions."
+    },
+    {
+      "agent": "build",
+      "task": "Build out the content calendar for {{business_name}} — 30 days of scheduled posts across {{platforms}}. For each post include: date, platform, post type, caption, hashtags, image brief, and CTA. Export as a structured list the team can execute directly."
+    },
+    {
+      "agent": "growth",
+      "task": "Define the distribution and growth strategy for {{business_name}}'s campaign. Include: paid ad targeting parameters (if budget allows: {{budget}}), organic growth tactics, local SEO plays, community engagement plan on {{platforms}}, and lead capture/follow-up sequence."
+    },
+    {
+      "agent": "reporter",
+      "task": "Create the campaign reporting framework for {{business_name}}. Define: KPIs to track (leads, reach, engagement, conversions), weekly review checklist, monthly report template, and success benchmarks for a {{goal}} campaign in {{industry}}."
+    }
+  ]
+}

@@ -235,10 +235,10 @@ export function ClientCard({ client, onEdit, onArchiveToggle, archiving }: Props
           backgroundColor: "var(--surface)",
         }}
       >
-        {/* View in Social */}
+        {/* View Projects (focused drilldown) */}
         {!isArchived && (
           <Link
-            href={`/social?client=${client.slug}`}
+            href={`/clients/${client.slug}`}
             style={{
               flex: 1,
               display: "flex",
@@ -255,8 +255,36 @@ export function ClientCard({ client, onEdit, onArchiveToggle, archiving }: Props
               fontFamily: "var(--font-heading)",
             }}
           >
-            <ExternalLink style={{ width: "13px", height: "13px" }} />
-            Dashboard
+            View Projects
+          </Link>
+        )}
+        {/* View in Social */}
+        {!isArchived && (
+          <Link
+            href={`/social?client=${client.slug}`}
+            title="Social dashboard"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "7px",
+              borderRadius: "var(--radius-md)",
+              border: "1px solid var(--border)",
+              backgroundColor: "transparent",
+              color: "var(--text-muted)",
+              textDecoration: "none",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-primary)";
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--border-strong)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)";
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--border)";
+            }}
+          >
+            <ExternalLink style={{ width: "14px", height: "14px" }} />
           </Link>
         )}
 

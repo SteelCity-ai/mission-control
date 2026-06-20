@@ -5,6 +5,9 @@ import { StatsCard } from "@/components/StatsCard";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { Notepad } from "@/components/Notepad";
+import { CommandBar } from "@/components/CommandBar";
+import { ActiveWorkflows } from "@/components/ActiveWorkflows";
+import { AttentionQueue } from "@/components/AttentionQueue";
 import {
   Activity,
   CheckCircle,
@@ -23,8 +26,10 @@ import {
   FolderKanban,
   Gauge,
   AlertTriangle,
+  Radio,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BRANDING, getAgentDisplayName } from "@/config/branding";
 
 interface Stats {
@@ -83,11 +88,13 @@ interface ProjectSummary {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<Stats>({ total: 0, today: 0, success: 0, error: 0, byType: {} });
   const [agents, setAgents] = useState<Agent[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectSummary, setProjectSummary] = useState<ProjectSummary | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [dispatchRefresh, setDispatchRefresh] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -166,8 +173,64 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Attention Queue */}
+      <div
+        className="mb-4 rounded-xl overflow-hidden"
+        style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}
+      >
+        <div
+          className="px-5 py-3 flex items-center justify-between"
+          style={{ borderBottom: "1px solid var(--border)" }}
+        >
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4" style={{ color: "var(--warning)" }} />
+            <h2
+              className="text-sm font-semibold"
+              style={{ fontFamily: "var(--font-heading)", color: "var(--text-primary)" }}
+            >
+              Attention Queue
+            </h2>
+          </div>
+        </div>
+        <AttentionQueue limit={4} />
+      </div>
+
+      {/* Command + Active Dispatches row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        {/* Command Bar */}
+        <CommandBar
+          placeholder="Dispatch a task to any agent… (⌘ Enter to send)"
+          onDispatched={() => setDispatchRefresh((n) => n + 1)}
+        />
+
+        {/* Active Dispatches */}
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}
+        >
+          <div
+            className="px-5 py-3 flex items-center justify-between"
+            style={{ borderBottom: "1px solid var(--border)" }}
+          >
+            <div className="flex items-center gap-2">
+              <Radio className="w-4 h-4" style={{ color: "var(--accent)" }} />
+              <h2
+                className="text-sm font-semibold"
+                style={{ fontFamily: "var(--font-heading)", color: "var(--text-primary)" }}
+              >
+                Active Dispatches
+              </h2>
+            </div>
+            <Link href="/workflows" className="text-xs" style={{ color: "var(--accent)" }}>
+              All →
+            </Link>
+          </div>
+          <ActiveWorkflows limit={5} refreshTrigger={dispatchRefresh} showHeader={false} />
+        </div>
+      </div>
+
       {/* Projects Overview */}
-      <div 
+      <div
         className="mb-6 rounded-xl overflow-hidden"
         style={{
           backgroundColor: 'var(--card)',
@@ -208,7 +271,9 @@ export default function DashboardPage() {
                 style={{
                   backgroundColor: 'var(--card-elevated)',
                   border: '1px solid var(--border)',
+                  cursor: 'pointer',
                 }}
+                onClick={() => router.push(`/projects/${project.id}`)}
                 onMouseEnter={e => {
                   (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)';
                   (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
